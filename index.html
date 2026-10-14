@@ -2155,16 +2155,37 @@ $("checkoutBtn").addEventListener("click", () => {
 
 /* =====================================
    5. PRODUK DAN STOK
+   DESAIN LAMA TETAP DIPAKAI
 ===================================== */
 
+let editingProductId = null;
+
 $("showProductForm").addEventListener("click", () => {
+  editingProductId = null;
+
+  $("productForm").reset();
+  $("productFormPanel").querySelector("h3").textContent =
+    "Tambah Produk Baru";
+
+  $("productFormPanel").querySelector(
+    'button[type="submit"]'
+  ).textContent = "Simpan Produk";
+
   $("productFormPanel").style.display = "block";
   $("newProductName").focus();
 });
 
 $("cancelProductForm").addEventListener("click", () => {
-  $("productFormPanel").style.display = "none";
+  editingProductId = null;
   $("productForm").reset();
+
+  $("productFormPanel").style.display = "none";
+  $("productFormPanel").querySelector("h3").textContent =
+    "Tambah Produk Baru";
+
+  $("productFormPanel").querySelector(
+    'button[type="submit"]'
+  ).textContent = "Simpan Produk";
 });
 
 $("productForm").addEventListener("submit", event => {
@@ -2190,26 +2211,68 @@ $("productForm").addEventListener("submit", event => {
   }
 
   if (price < cost) {
-    if (!confirm("Harga jual lebih rendah daripada modal. Tetap simpan?")) return;
+    if (!confirm(
+      "Harga jual lebih rendah daripada modal. Tetap simpan?"
+    )) return;
   }
 
-  data.products.push({
-    id: makeId(), name, business, cost, price, stock, min, unit
-  });
+  const productData = {
+    name,
+    business,
+    cost,
+    price,
+    stock,
+    min,
+    unit
+  };
 
-  logActivity(
-    "Produk ditambahkan",
-    `${name} didaftarkan pada unit ${business}.`,
-    false
-  );
+  if (editingProductId) {
+    const product = getProduct(editingProductId);
+
+    if (!product) {
+      notify("Produk tidak ditemukan.");
+      return;
+    }
+
+    const oldName = product.name;
+
+    Object.assign(product, productData);
+
+    logActivity(
+      "Produk diedit",
+      `${oldName} diperbarui menjadi ${name}.`,
+      false
+    );
+  } else {
+    data.products.push({
+      id: makeId(),
+      ...productData
+    });
+
+    logActivity(
+      "Produk ditambahkan",
+      `${name} ditambahkan ke unit ${business}.`,
+      false
+    );
+  }
 
   if (!saveData()) return;
 
+  editingProductId = null;
   $("productForm").reset();
   $("productFormPanel").style.display = "none";
 
+  $("productFormPanel").querySelector("h3").textContent =
+    "Tambah Produk Baru";
+
+  $("productFormPanel").querySelector(
+    'button[type="submit"]'
+  ).textContent = "Simpan Produk";
+
   renderAll();
-  notify("Produk berhasil ditambahkan.");
+  renderDrinkProducts();
+
+  notify("Data produk berhasil disimpan.");
 });
 
 $("stockSearch").addEventListener("input", renderStockTable);
@@ -2236,23 +2299,139 @@ function renderStockTable() {
     (!business || product.business === business)
   );
 
-  $("stockTable").innerHTML = products.length ? products.map(product => `
-    <tr>
-      <td>${escapeHTML(product.name)}</td>
-      <td>${escapeHTML(product.business)}</td>
-      <td>${money(product.cost)}</td>
-      <td>${money(product.price)}</td>
-      <td>${product.stock} ${escapeHTML(product.unit)}</td>
-      <td>${stockStatus(product)}</td>
-      <td>
-        <button class="btn secondary" data-stock="${escapeHTML(product.id)}">Ubah Stok</button>
-      </td>
-    </tr>
-  `).join("") : `<tr><td colspan="7" class="empty">Produk tidak ditemukan.</td></tr>`;
+  $("stockTable").innerHTML = products.length
+    ? products.map(product => `
+      <tr>
+        <td>${escapeHTML(product.name)}</td>
+        <td>${escapeHTML(product.business)}</td>
+        <td>${money(product.cost)}</td>
+        <td>${money(product.price)}</td>
+        <td>${product.stock} ${escapeHTML(product.unit)}</td>
+        <td>${stockStatus(product)}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn secondary"
+              data-edit-product="${escapeHTML(product.id)}">
+              Edit
+            </button>
 
-  $("stockTable").querySelectorAll("[data-stock]").forEach(button => {
-    button.addEventListener("click", () => adjustStock(button.dataset.stock));
+            <button class="btn secondary"
+              data-stock="${escapeHTML(product.id)}">
+              Ubah Stok
+            </button>
+
+            <button class="btn danger"
+              data-delete-product="${escapeHTML(product.id)}">
+              Hapus
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="7" class="empty">
+        Produk tidak ditemukan.
+      </td></tr>`;
+
+  $("stockTable").querySelectorAll("[data-edit-product]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        editProduct(button.dataset.editProduct);
+      });
+    });
+
+  $("stockTable").querySelectorAll("[data-stock]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        adjustStock(button.dataset.stock);
+      });
+    });
+
+  $("stockTable").querySelectorAll("[data-delete-product]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        deleteProduct(button.dataset.deleteProduct);
+      });
+    });
+}
+
+function editProduct(id) {
+  const product = getProduct(id);
+  if (!product) {
+    notify("Produk tidak ditemukan.");
+    return;
+  }
+
+  editingProductId = id;
+
+  $("newProductName").value = product.name;
+  $("newProductBusiness").value = product.business;
+  $("newProductCost").value = product.cost;
+  $("newProductPrice").value = product.price;
+  $("newProductStock").value = product.stock;
+  $("newProductMinimum").value = product.min;
+  $("newProductUnit").value = product.unit;
+
+  $("productFormPanel").querySelector("h3").textContent =
+    "Edit Produk";
+
+  $("productFormPanel").querySelector(
+    'button[type="submit"]'
+  ).textContent = "Simpan Perubahan";
+
+  $("productFormPanel").style.display = "block";
+
+  $("productFormPanel").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
   });
+
+  $("newProductName").focus();
+}
+
+function deleteProduct(id) {
+  const product = getProduct(id);
+  if (!product) {
+    notify("Produk tidak ditemukan.");
+    return;
+  }
+
+  const relatedTransactions = data.transactions.some(transaction =>
+    transaction.items.some(item => item.productId === id)
+  );
+
+  let message = `Yakin ingin menghapus produk "${product.name}"?`;
+
+  if (relatedTransactions) {
+    message +=
+      "\n\nProduk ini tercatat dalam transaksi sebelumnya. " +
+      "Riwayat transaksi lama tetap dipertahankan.";
+  }
+
+  if (!confirm(message)) return;
+
+  data.products = data.products.filter(item => item.id !== id);
+
+  // Hapus produk dari keranjang kasir jika masih dipilih.
+  cart = cart.filter(item => item.id !== id);
+
+  logActivity(
+    "Produk dihapus",
+    `${product.name} dihapus dari daftar produk.`,
+    false
+  );
+
+  if (!saveData()) return;
+
+  if (editingProductId === id) {
+    editingProductId = null;
+    $("productForm").reset();
+    $("productFormPanel").style.display = "none";
+  }
+
+  renderAll();
+  renderDrinkProducts();
+
+  notify("Produk berhasil dihapus.");
 }
 
 function adjustStock(id) {
@@ -2261,7 +2440,7 @@ function adjustStock(id) {
 
   const answer = prompt(
     `Stok saat ini ${product.stock} ${product.unit}.\n` +
-    `Masukkan stok fisik hasil penghitungan untuk ${product.name}:`
+    `Masukkan stok terbaru untuk ${product.name}:`
   );
 
   if (answer === null || answer.trim() === "") return;
@@ -2279,7 +2458,7 @@ function adjustStock(id) {
   if (difference !== 0) {
     logActivity(
       "Penyesuaian stok",
-      `${product.name}: stok ${oldStock} menjadi ${newStock}. Selisih ${difference}.`,
+      `${product.name}: stok ${oldStock} menjadi ${newStock}.`,
       difference < 0
     );
   }
@@ -2289,6 +2468,8 @@ function adjustStock(id) {
   if (!saveData()) return;
 
   renderAll();
+  renderDrinkProducts();
+
   notify("Stok berhasil diperbarui.");
 }
 
