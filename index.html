@@ -3,33 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101827">
-  <title>UsahaKu | Manajemen Usaha Terpadu</title>
+  <title>UsahaKu — Manajemen Usaha</title>
 
   <style>
     :root {
-      --bg: #f4f6fb;
-      --surface: #ffffff;
-      --text: #172033;
-      --muted: #7c879b;
-      --primary: #4f46e5;
-      --border: #e8ebf2;
-      --green: #0e9f6e;
-      --red: #e5484d;
-      --sidebar: #101827;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #182230;
+      --muted: #697586;
+      --line: #e4e9f0;
+      --brand: #2563eb;
+      --dark: #111c31;
+      --shadow: 0 8px 26px rgba(20, 35, 60, .07);
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      font-family: Arial, sans-serif;
       background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      color: var(--ink);
     }
 
     button, input, select {
@@ -38,159 +34,119 @@
 
     button {
       cursor: pointer;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-weight: 600;
+    }
+
+    .primary {
+      background: var(--brand);
+      color: white;
+    }
+
+    .secondary {
+      background: #edf2f8;
+      color: #263548;
+    }
+
+    .danger {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
     .app {
-      display: flex;
       min-height: 100vh;
     }
 
     .sidebar {
-      width: 250px;
-      background: var(--sidebar);
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 245px;
+      padding: 24px 16px;
+      background: var(--dark);
       color: white;
-      padding: 25px 16px;
-      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 25px;
+      gap: 24px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 11px;
       padding: 0 8px;
     }
 
     .brand-icon {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: var(--brand);
       display: grid;
       place-items: center;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #818cf8, #4f46e5);
-      font-size: 23px;
+      font-size: 22px;
     }
 
     .brand h1 {
-      font-size: 20px;
-      letter-spacing: -.5px;
+      font-size: 19px;
+      margin: 0;
     }
 
     .brand p {
-      color: #aab4c8;
-      font-size: 11px;
-      margin-top: 4px;
-    }
-
-    .nav-label {
-      color: #8290a9;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      padding: 0 12px;
-      margin-bottom: 9px;
-    }
-
-    .nav-list {
-      display: grid;
-      gap: 5px;
-    }
-
-    .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      border: 0;
-      padding: 12px;
-      border-radius: 10px;
-      color: #b8c2d5;
-      background: transparent;
-      text-align: left;
-      font-size: 13px;
-      transition: .2s;
-    }
-
-    .nav-btn:hover, .nav-btn.active {
-      color: white;
-      background: #28344a;
-    }
-
-    .nav-btn.active {
-      box-shadow: inset 3px 0 #818cf8;
-    }
-
-    .nav-icon {
-      width: 22px;
-      text-align: center;
-      font-size: 17px;
-    }
-
-    .sidebar-bottom {
-      margin-top: auto;
-      padding: 15px 12px;
-      background: #1d293c;
-      border-radius: 12px;
-      color: #d7deeb;
       font-size: 12px;
-      line-height: 1.7;
+      color: #b8c4d8;
+      margin: 4px 0 0;
     }
 
-    .sidebar-bottom span {
-      color: #aab4c8;
-      font-size: 11px;
+    .nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav button {
+      background: transparent;
+      color: #c5d0e2;
+      text-align: left;
+      padding: 12px;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #24334f;
+      color: white;
+    }
+
+    .side-note {
+      margin-top: auto;
+      font-size: 12px;
+      color: #b8c4d8;
+      line-height: 1.6;
+      padding: 12px;
     }
 
     .main {
-      flex: 1;
-      min-width: 0;
+      margin-left: 245px;
+      padding: 28px;
+      max-width: 1600px;
     }
 
     .topbar {
-      height: 76px;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      padding: 0 30px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 12px;
     }
 
     .topbar h2 {
-      font-size: 19px;
+      margin: 0;
+      font-size: 27px;
     }
 
     .topbar p {
+      margin: 5px 0 0;
       color: var(--muted);
-      font-size: 12px;
-      margin-top: 5px;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .date-label {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .icon-btn {
-      border: 1px solid var(--border);
-      background: white;
-      padding: 10px 12px;
-      border-radius: 10px;
-    }
-
-    .content {
-      padding: 28px 30px;
-      max-width: 1500px;
-      margin: auto;
     }
 
     .page {
@@ -201,32 +157,78 @@
       display: block;
     }
 
+    .welcome,
+    .stat,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      box-shadow: var(--shadow);
+    }
+
     .welcome {
-      background: linear-gradient(115deg, #4338ca, #6366f1 65%, #818cf8);
-      border-radius: 18px;
-      padding: 28px;
-      color: white;
+      padding: 24px;
+      margin-bottom: 20px;
+      background: linear-gradient(120deg, #fff, #eff6ff);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 24px;
+      gap: 15px;
     }
 
-    .welcome h2 {
-      font-size: clamp(21px, 3vw, 29px);
-      margin-bottom: 9px;
+    .welcome h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
     }
 
     .welcome p {
-      color: #e0e7ff;
-      font-size: 13px;
-      line-height: 1.7;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
     }
 
-    .welcome-art {
-      font-size: 57px;
-      opacity: .9;
+    .welcome .art {
+      font-size: 45px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      padding: 18px;
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat .value {
+      font-size: 25px;
+      font-weight: 800;
+      margin: 10px 0 5px;
+    }
+
+    .stat small {
+      color: var(--muted);
+    }
+
+    .panel {
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .panel h3 {
+      margin: 0 0 8px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .section-head {
@@ -234,2570 +236,460 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
-      margin: 26px 0 16px;
+      margin: 20px 0 14px;
     }
 
     .section-head h3 {
-      font-size: 16px;
-    }
-
-    .section-head p {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 5px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .stat-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 20px;
-      min-width: 0;
-    }
-
-    .stat-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 18px;
-    }
-
-    .stat-name {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .stat-icon {
-      width: 39px;
-      height: 39px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: #eef2ff;
-      font-size: 19px;
-    }
-
-    .stat-card h3 {
-      font-size: clamp(16px, 2vw, 23px);
-      overflow-wrap: anywhere;
-    }
-
-    .stat-card small {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 9px;
-      line-height: 1.5;
-    }
-
-    .green {
-      color: var(--green) !important;
-    }
-
-    .red {
-      color: var(--red) !important;
-    }
-
-    .business-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 15px;
-    }
-
-    .business-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 18px;
-      transition: .2s;
-    }
-
-    .business-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px #18213a0d;
-    }
-
-    .business-card .emoji {
-      font-size: 28px;
-      margin-bottom: 13px;
-    }
-
-    .business-card h4 {
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .business-card p {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .business-card button {
-      width: 100%;
-      margin-top: 15px;
-      border: 1px solid #e0e7ff;
-      color: var(--primary);
-      background: #f5f6ff;
-      border-radius: 9px;
-      padding: 10px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .panel {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 21px;
-      margin-top: 18px;
-      min-width: 0;
-    }
-
-    .panel h3 {
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-
-    .panel-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 18px;
-      line-height: 1.6;
-    }
-
-    .columns {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .chart {
-      min-height: 195px;
-      display: flex;
-      align-items: end;
-      justify-content: space-around;
-      gap: 13px;
-      padding: 15px 0 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .chart-column {
-      flex: 1;
-      max-width: 65px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: end;
-      height: 175px;
-      gap: 8px;
-    }
-
-    .bar {
-      width: 75%;
-      min-height: 3px;
-      background: linear-gradient(180deg, #818cf8, #4f46e5);
-      border-radius: 7px 7px 2px 2px;
-    }
-
-    .chart-column small {
-      color: var(--muted);
-      font-size: 10px;
-    }
-
-    .alert-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .alert-item {
-      padding: 13px;
-      border-radius: 10px;
-      background: #fff8eb;
-      border: 1px solid #ffebc2;
-      display: flex;
-      align-items: start;
-      gap: 10px;
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .alert-item.danger {
-      background: #fff0f0;
-      border-color: #ffd4d4;
-    }
-
-    .alert-item.normal {
-      background: #ecfdf5;
-      border-color: #c6f6dd;
+      margin: 0;
     }
 
     .toolbar {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 17px;
-      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    input,
+    select {
+      padding: 11px 12px;
+      border: 1px solid #d7dee8;
+      border-radius: 10px;
+      background: white;
+      color: var(--ink);
+      max-width: 100%;
+    }
+
+    .toolbar input {
+      flex: 1;
+      min-width: 170px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 13px;
     }
 
     .field {
       display: grid;
-      gap: 7px;
-      min-width: 0;
+      gap: 6px;
     }
 
     .field label {
-      color: #596579;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
     }
 
-    .field input, .field select {
+    .field input,
+    .field select {
       width: 100%;
-      min-width: 0;
-      padding: 11px 12px;
-      border: 1px solid #dfe4ed;
-      border-radius: 9px;
-      outline: none;
-      background: white;
-      color: var(--text);
     }
 
-    .field input:focus, .field select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px #4f46e51a;
-    }
-
-    .toolbar .field {
-      flex: 1;
-      min-width: 150px;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 9px;
-      padding: 11px 15px;
-      background: var(--primary);
-      color: white;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .btn:hover {
-      filter: brightness(.95);
-    }
-
-    .btn.secondary {
-      background: #eef2ff;
-      color: var(--primary);
-    }
-
-    .btn.danger {
-      background: #fff0f0;
-      color: var(--red);
-    }
-
-    .btn.success {
-      background: #e9fbf2;
-      color: #087f55;
-    }
-
-    .btn.dark {
-      background: #263247;
-      color: white;
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 15px;
     }
 
     .table-wrap {
-      width: 100%;
       overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      min-width: 650px;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
       text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
     }
 
     th {
-      background: #f8f9fc;
-      color: #778197;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-    }
-
-    th, td {
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    td {
-      color: #374156;
-    }
-
-    tbody tr:hover {
-      background: #fafbff;
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .pill.green {
-      background: #e9fbf2;
-    }
-
-    .pill.red {
-      background: #fff0f0;
-    }
-
-    .pill.yellow {
-      background: #fff6dd;
-      color: #a16b00 !important;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 13px;
-    }
-
-    .product-card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .product-card .product-emoji {
-      font-size: 29px;
-    }
-
-    .product-card h4 {
-      font-size: 13px;
-    }
-
-    .product-card p {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .product-card strong {
-      font-size: 15px;
-    }
-
-    .product-card button {
-      margin-top: auto;
-    }
-
-    .cart-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
+      color: #667085;
+      background: #f8fafc;
       font-size: 12px;
     }
 
-    .cart-row button {
-      border: 0;
-      background: #fff0f0;
-      color: var(--red);
-      border-radius: 7px;
-      padding: 6px 9px;
-    }
-
-    .total-line {
+    .actions {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 0;
-      font-size: 13px;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
-    .total-line.final {
-      font-weight: 800;
-      font-size: 18px;
-      border-top: 1px solid var(--border);
-      margin-top: 6px;
-      padding-top: 17px;
+    .small {
+      padding: 7px 9px;
+      font-size: 12px;
     }
 
     .empty {
-      color: var(--muted);
       text-align: center;
-      padding: 27px 12px;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .notice {
-      padding: 13px 15px;
-      background: #eef2ff;
-      color: #3730a3;
-      border-radius: 10px;
-      font-size: 12px;
-      line-height: 1.7;
-      margin-bottom: 18px;
-    }
-
-    .notice.warning {
-      background: #fff7e6;
-      color: #8b5b00;
-    }
-
-    .two-fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 13px;
-    }
-
-    .form-stack {
-      display: grid;
-      gap: 14px;
-    }
-
-    .report-cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    .report-card {
-      background: #f8f9fc;
-      border-radius: 11px;
-      padding: 16px;
-    }
-
-    .report-card p {
       color: var(--muted);
-      font-size: 11px;
-      margin-bottom: 10px;
+      padding: 25px;
     }
 
-    .report-card strong {
-      font-size: 17px;
-      overflow-wrap: anywhere;
+    .hidden {
+      display: none !important;
     }
 
     .footer {
-      padding: 25px 0 5px;
-      color: #929bae;
-      font-size: 11px;
       text-align: center;
-      line-height: 1.8;
-    }
-
-    .toast {
-      position: fixed;
-      right: 22px;
-      bottom: 22px;
-      max-width: min(360px, calc(100vw - 32px));
-      padding: 14px 18px;
-      border-radius: 12px;
-      background: #172033;
-      color: white;
+      color: var(--muted);
       font-size: 12px;
-      line-height: 1.6;
-      box-shadow: 0 8px 30px #0002;
-      display: none;
-      z-index: 100;
+      padding: 22px;
     }
 
-    @media (max-width: 1100px) {
-      .stats, .business-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .product-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .columns {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .app {
-        display: block;
-      }
-
+    @media (max-width: 1000px) {
       .sidebar {
-        width: 100%;
-        padding: 13px;
-        gap: 14px;
+        width: 205px;
       }
 
-      .brand {
-        padding: 0 5px;
-      }
-
-      .nav-label, .sidebar-bottom {
-        display: none;
-      }
-
-      .nav-list {
-        display: flex;
-        overflow-x: auto;
-        gap: 6px;
-        padding-bottom: 3px;
-      }
-
-      .nav-btn {
-        flex: 0 0 auto;
-        width: auto;
-        padding: 10px;
-        font-size: 11px;
-      }
-
-      .nav-btn.active {
-        box-shadow: inset 0 -3px #818cf8;
-      }
-
-      .nav-icon {
-        width: auto;
-      }
-
-      .topbar {
-        padding: 14px 17px;
-        height: auto;
-      }
-
-      .topbar h2 {
-        font-size: 16px;
-      }
-
-      .date-label {
-        display: none;
-      }
-
-      .content {
-        padding: 18px 13px;
-      }
-
-      .welcome {
-        padding: 22px 18px;
-      }
-
-      .welcome-art {
-        font-size: 37px;
+      .main {
+        margin-left: 205px;
+        padding: 20px;
       }
 
       .stats {
-        gap: 10px;
-      }
-
-      .stat-card {
-        padding: 14px;
-      }
-
-      .stat-icon {
-        width: 31px;
-        height: 31px;
-      }
-
-      .business-grid {
-        gap: 10px;
-      }
-
-      .business-card {
-        padding: 14px;
-      }
-
-      .product-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .panel {
-        padding: 15px;
-      }
-
-      .report-cards {
-        grid-template-columns: 1fr;
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media print {
-      .sidebar, .topbar, .toolbar, .no-print, .footer {
-        display: none !important;
+    @media (max-width: 650px) {
+      .sidebar {
+        position: static;
+        width: auto;
+        padding: 14px;
       }
 
-      body, .main, .content {
-        background: white;
-        padding: 0;
+      .nav {
+        display: flex;
+        overflow-x: auto;
       }
 
-      .page {
-        display: none !important;
+      .nav button {
+        white-space: nowrap;
       }
 
-      .page.active {
-        display: block !important;
+      .side-note {
+        display: none;
       }
 
-      .panel, .stat-card {
-        break-inside: avoid;
+      .main {
+        margin: 0;
+        padding: 14px;
+      }
+
+      .topbar h2 {
+        font-size: 22px;
+      }
+
+      .stats {
+        gap: 9px;
+      }
+
+      .stat {
+        padding: 13px;
+      }
+
+      .stat .value {
+        font-size: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 14px;
       }
     }
   </style>
 </head>
 
 <body>
-<div class="app">
+  <div class="app">
 
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-icon">✦</div>
-      <div>
-        <h1>UsahaKu</h1>
-        <p>Business Management System</p>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">✦</div>
+        <div>
+          <h1>UsahaKu</h1>
+          <p>Manajemen usaha sederhana</p>
+        </div>
       </div>
-    </div>
 
-    <div>
-      <div class="nav-label">MENU UTAMA</div>
-      <nav class="nav-list">
-        <button class="nav-btn active" data-page="dashboard">
-          <span class="nav-icon">▦</span> Dashboard
-        </button>
-        <button class="nav-btn" data-page="kasir">
-          <span class="nav-icon">🛒</span> Kasir Minuman
-        </button>
-        <button class="nav-btn" data-page="produk">
-          <span class="nav-icon">📦</span> Produk & Stok
-        </button>
-        <button class="nav-btn" data-page="keuangan">
-          <span class="nav-icon">💰</span> Keuangan
-        </button>
-        <button class="nav-btn" data-page="laporan">
-          <span class="nav-icon">📊</span> Laporan
-        </button>
-        <button class="nav-btn" data-page="aktivitas">
-          <span class="nav-icon">🛡️</span> Aktivitas
-        </button>
+      <nav class="nav">
+        <button class="active" data-page="dashboard">▦ Dashboard</button>
+        <button data-page="kasir">🛒 Kasir Minuman</button>
+        <button data-page="produk">📦 Produk & Stok</button>
+        <button data-page="keuangan">💰 Keuangan</button>
+        <button data-page="laporan">📊 Laporan Usaha</button>
+        <button data-page="aktivitas">🕘 Aktivitas</button>
+        <button data-page="unit">🏪 Unit Usaha</button>
       </nav>
-    </div>
 
-    <div>
-      <div class="nav-label">UNIT USAHA</div>
-      <nav class="nav-list">
-        <button class="nav-btn" data-business="Pom Mini">
-          <span class="nav-icon">⛽</span> Pom Mini
-        </button>
-        <button class="nav-btn" data-business="Minuman">
-          <span class="nav-icon">🥤</span> Minuman
-        </button>
-        <button class="nav-btn" data-business="Toko Sayur">
-          <span class="nav-icon">🥬</span> Toko Sayur
-        </button>
-        <button class="nav-btn" data-business="Fotokopi">
-          <span class="nav-icon">🖨️</span> Fotokopi
-        </button>
-      </nav>
-    </div>
-
-    <div class="sidebar-bottom">
-      <strong>✦ UsahaKu Terpadu</strong><br>
-      <span>Satu sistem untuk semua usaha.</span>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <h2 id="pageTitle">Dashboard</h2>
-        <p id="pageSubtitle">Pantau seluruh usaha dalam satu tempat.</p>
+      <div class="side-note">
+        UsahaKu<br>
+        Kelola usaha dengan lebih mudah.
       </div>
-      <div class="top-actions">
-        <span class="date-label" id="todayLabel"></span>
-        <button class="icon-btn" id="notificationBtn" title="Lihat notifikasi">
-          🔔 <span id="notificationCount">0</span>
-        </button>
-      </div>
-    </header>
+    </aside>
 
-    <div class="content">
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Pantau seluruh usaha dalam satu tempat.</p>
+        </div>
+        <div id="today"></div>
+      </header>
 
-      <!-- DASHBOARD -->
       <section class="page active" id="page-dashboard">
         <div class="welcome">
           <div>
-            <h2>Selamat datang di UsahaKu 👋</h2>
-            <p>Kelola penjualan, stok, pemasukan, dan pengeluaran<br>
-              seluruh usahamu dengan lebih teratur.</p>
+            <h3>Selamat datang di UsahaKu 👋</h3>
+            <p>Kelola produk, stok, transaksi, dan keuangan<br>
+              usahamu melalui satu halaman.</p>
           </div>
-          <div class="welcome-art">📈</div>
+          <div class="art">📈</div>
         </div>
 
         <div class="stats">
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-name">Pemasukan Hari Ini</span>
-              <span class="stat-icon">💵</span>
-            </div>
-            <h3 id="dashIncome">Rp0</h3>
-            <small>Omzet transaksi tercatat hari ini</small>
+          <div class="stat">
+            <div class="label">Jumlah Produk</div>
+            <div class="value" id="statProducts">0</div>
+            <small>Produk terdaftar</small>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-name">Pengeluaran Hari Ini</span>
-              <span class="stat-icon">💸</span>
-            </div>
-            <h3 id="dashExpense">Rp0</h3>
-            <small>Biaya yang dicatat hari ini</small>
+          <div class="stat">
+            <div class="label">Nilai Stok</div>
+            <div class="value" id="statStock">Rp0</div>
+            <small>Perkiraan modal persediaan</small>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-name">Laba Kotor Sementara</span>
-              <span class="stat-icon">📈</span>
-            </div>
-            <h3 id="dashProfit">Rp0</h3>
-            <small>Omzet dikurangi modal barang terjual</small>
+          <div class="stat">
+            <div class="label">Transaksi Hari Ini</div>
+            <div class="value" id="statTransactions">0</div>
+            <small>Transaksi selesai</small>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-name">Stok Perlu Diperiksa</span>
-              <span class="stat-icon">⚠️</span>
-            </div>
-            <h3 id="dashStock">0</h3>
-            <small>Produk mencapai batas minimum</small>
-          </div>
-        </div>
-
-        <div class="section-head">
-          <div>
-            <h3>Unit Usaha</h3>
-            <p>Pilih usaha untuk mulai mengelola aktivitasnya.</p>
-          </div>
-        </div>
-
-        <div class="business-grid">
-          <div class="business-card">
-            <div class="emoji">⛽</div>
-            <h4>Pom Mini</h4>
-            <p>Catat penjualan BBM, liter, modal, dan selisih stok.</p>
-            <button data-open-business="Pom Mini">Kelola Pom Mini →</button>
-          </div>
-
-          <div class="business-card">
-            <div class="emoji">🥤</div>
-            <h4>Usaha Minuman</h4>
-            <p>Kasir, menu, harga jual, transaksi, dan bahan baku.</p>
-            <button data-open-business="Minuman">Buka Kasir →</button>
-          </div>
-
-          <div class="business-card">
-            <div class="emoji">🥬</div>
-            <h4>Toko Sayur</h4>
-            <p>Catat sayuran, berat, harga, dan stok barang.</p>
-            <button data-open-business="Toko Sayur">Kelola Sayur →</button>
-          </div>
-
-          <div class="business-card">
-            <div class="emoji">🖨️</div>
-            <h4>Fotokopi</h4>
-            <p>Catat fotokopi, cetak, scan, kertas, dan ATK.</p>
-            <button data-open-business="Fotokopi">Kelola Fotokopi →</button>
-          </div>
-        </div>
-
-        <div class="columns">
-          <div class="panel">
-            <h3>Ringkasan Penjualan 7 Hari</h3>
-            <p class="panel-subtitle">Berdasarkan transaksi yang tersimpan.</p>
-            <div class="chart" id="salesChart"></div>
-          </div>
-
-          <div class="panel">
-            <h3>Notifikasi & Peringatan</h3>
-            <p class="panel-subtitle">Hal-hal yang membutuhkan perhatianmu.</p>
-            <div class="alert-list" id="dashboardAlerts"></div>
+          <div class="stat">
+            <div class="label">Omzet Hari Ini</div>
+            <div class="value" id="statRevenue">Rp0</div>
+            <small>Total penjualan hari ini</small>
           </div>
         </div>
 
         <div class="panel">
-          <h3>Transaksi Terbaru</h3>
-          <p class="panel-subtitle">Aktivitas penjualan terakhir yang tercatat.</p>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Waktu</th><th>Usaha</th><th>Nominal</th>
-                  <th>Pembayaran</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="recentTransactions"></tbody>
-            </table>
+          <h3>Mulai dari sini</h3>
+          <p class="muted">
+            Tambahkan produk terlebih dahulu, lalu gunakan kasir
+            untuk mencatat penjualan.
+          </p>
+          <div class="form-actions">
+            <button class="primary" data-go="produk">Kelola Produk</button>
+            <button class="secondary" data-go="kasir">Buka Kasir</button>
           </div>
         </div>
       </section>
 
-      <!-- KASIR -->
       <section class="page" id="page-kasir">
         <div class="section-head">
           <div>
-            <h3>Kasir Penjualan Minuman</h3>
-            <p>Pilih produk, masukkan keranjang, lalu simpan transaksi.</p>
+            <h3>Kasir Minuman</h3>
+            <p class="muted">Pilih produk untuk memulai transaksi.</p>
           </div>
         </div>
 
-        <div class="notice">
-          ℹ️ Kasir demo ini menyimpan transaksi di browser pada perangkat yang digunakan.
-          Data belum tersinkronisasi dengan perangkat lain.
+        <div class="panel">
+          <div class="toolbar">
+            <input id="kasirSearch" placeholder="Cari nama produk...">
+          </div>
+          <div id="kasirProducts" class="empty">
+            Belum ada produk. Tambahkan produk terlebih dahulu.
+          </div>
         </div>
 
-        <div class="columns">
-          <div class="panel">
-            <div class="toolbar">
-              <div class="field">
-                <label for="productSearch">Cari menu minuman</label>
-                <input id="productSearch" placeholder="Contoh: es teh">
-              </div>
-            </div>
-            <div class="product-grid" id="drinkProducts"></div>
-          </div>
-
-          <div class="panel">
-            <h3>🛒 Keranjang</h3>
-            <p class="panel-subtitle">Pesanan pelanggan saat ini.</p>
-            <div id="cartItems"></div>
-
-            <div class="total-line">
-              <span>Subtotal</span><strong id="cartSubtotal">Rp0</strong>
-            </div>
-
-            <div class="field" style="margin-top:12px">
-              <label for="discountInput">Diskon (Rp)</label>
-              <input id="discountInput" type="number" min="0" value="0">
-            </div>
-
-            <div class="total-line final">
-              <span>Total</span><strong id="cartTotal">Rp0</strong>
-            </div>
-
-            <div class="form-stack" style="margin-top:15px">
-              <div class="field">
-                <label for="paymentMethod">Metode pembayaran</label>
-                <select id="paymentMethod">
-                  <option value="Tunai">Tunai</option>
-                  <option value="QRIS">QRIS - perlu konfirmasi</option>
-                  <option value="Transfer">Transfer</option>
-                </select>
-              </div>
-
-              <div class="field" id="cashField">
-                <label for="cashReceived">Uang diterima (Rp)</label>
-                <input id="cashReceived" type="number" min="0" placeholder="Masukkan uang pelanggan">
-              </div>
-
-              <div class="total-line">
-                <span>Kembalian</span><strong id="changeAmount">Rp0</strong>
-              </div>
-
-              <button class="btn" id="checkoutBtn">Simpan Transaksi</button>
-              <button class="btn secondary" id="clearCartBtn">Kosongkan Keranjang</button>
-            </div>
+        <div class="panel">
+          <h3>Keranjang</h3>
+          <div id="cartItems" class="empty">Keranjang masih kosong.</div>
+          <div class="form-actions">
+            <button class="primary" id="checkoutBtn">Selesaikan Transaksi</button>
+            <button class="secondary" id="clearCartBtn">Kosongkan</button>
           </div>
         </div>
       </section>
 
-      <!-- PRODUK & STOK -->
       <section class="page" id="page-produk">
         <div class="section-head">
           <div>
-            <h3>Manajemen Produk & Stok</h3>
-            <p>Pantau stok dan harga seluruh unit usaha.</p>
+            <h3>Produk & Stok</h3>
+            <p class="muted">Tambah, edit, dan hapus data produk.</p>
           </div>
-          <button class="btn" id="showProductForm">+ Tambah Produk</button>
+          <button class="primary" id="addProductBtn">+ Tambah Produk</button>
         </div>
 
-        <div class="panel" id="productFormPanel" style="display:none">
-          <h3>Tambah Produk Baru</h3>
-          <p class="panel-subtitle">Isi informasi barang dengan benar.</p>
+        <div class="panel hidden" id="productEditor">
+          <h3 id="editorTitle">Tambah Produk</h3>
 
-          <form id="productForm" class="form-stack">
-            <div class="two-fields">
+          <form id="productForm">
+            <input type="hidden" id="productId">
+
+            <div class="form-grid">
               <div class="field">
-                <label for="newProductName">Nama produk</label>
-                <input id="newProductName" required maxlength="80" placeholder="Nama barang">
+                <label for="productName">Nama produk *</label>
+                <input id="productName" required maxlength="100"
+                  placeholder="Contoh: Es Teh">
               </div>
+
               <div class="field">
-                <label for="newProductBusiness">Unit usaha</label>
-                <select id="newProductBusiness" required>
-                  <option>Pom Mini</option>
-                  <option>Minuman</option>
-                  <option>Toko Sayur</option>
-                  <option>Fotokopi</option>
-                </select>
+                <label for="productCategory">Kategori</label>
+                <input id="productCategory" placeholder="Contoh: Minuman">
               </div>
+
               <div class="field">
-                <label for="newProductCost">Harga modal per unit (Rp)</label>
-                <input id="newProductCost" type="number" min="0" required>
+                <label for="productUnit">Satuan</label>
+                <input id="productUnit" value="pcs" required>
               </div>
+
               <div class="field">
-                <label for="newProductPrice">Harga jual per unit (Rp)</label>
-                <input id="newProductPrice" type="number" min="0" required>
+                <label for="productCost">Harga modal (Rp) *</label>
+                <input id="productCost" type="number" min="0"
+                  step="1" value="0" required>
               </div>
+
               <div class="field">
-                <label for="newProductStock">Stok awal</label>
-                <input id="newProductStock" type="number" min="0" step="any" required>
+                <label for="productPrice">Harga jual (Rp) *</label>
+                <input id="productPrice" type="number" min="0"
+                  step="1" value="0" required>
               </div>
+
               <div class="field">
-                <label for="newProductMinimum">Batas minimum stok</label>
-                <input id="newProductMinimum" type="number" min="0" step="any" value="5" required>
-              </div>
-              <div class="field">
-                <label for="newProductUnit">Satuan</label>
-                <select id="newProductUnit">
-                  <option value="pcs">Pcs</option>
-                  <option value="gelas">Gelas</option>
-                  <option value="kg">Kg</option>
-                  <option value="ikat">Ikat</option>
-                  <option value="liter">Liter</option>
-                  <option value="rim">Rim</option>
-                  <option value="lembar">Lembar</option>
-                  <option value="pak">Pak</option>
-                </select>
+                <label for="productStock">Stok *</label>
+                <input id="productStock" type="number" min="0"
+                  step="1" value="0" required>
               </div>
             </div>
 
-            <div style="display:flex;gap:9px;flex-wrap:wrap">
-              <button class="btn" type="submit">Simpan Produk</button>
-              <button class="btn secondary" type="button" id="cancelProductForm">Batal</button>
+            <div class="form-actions">
+              <button class="primary" type="submit">Simpan Produk</button>
+              <button class="secondary" type="button" id="cancelProductBtn">
+                Batal
+              </button>
             </div>
           </form>
         </div>
 
         <div class="panel">
           <div class="toolbar">
-            <div class="field">
-              <label for="stockSearch">Cari produk</label>
-              <input id="stockSearch" placeholder="Nama produk...">
-            </div>
-            <div class="field">
-              <label for="stockBusinessFilter">Filter unit usaha</label>
-              <select id="stockBusinessFilter">
-                <option value="">Semua usaha</option>
-                <option>Pom Mini</option>
-                <option>Minuman</option>
-                <option>Toko Sayur</option>
-                <option>Fotokopi</option>
-              </select>
-            </div>
+            <input id="productSearch" placeholder="Cari produk...">
           </div>
 
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Produk</th><th>Unit Usaha</th><th>Modal</th>
-                  <th>Harga Jual</th><th>Stok</th><th>Status</th><th>Aksi</th>
+                  <th>Nama Produk</th>
+                  <th>Kategori</th>
+                  <th>Modal</th>
+                  <th>Harga Jual</th>
+                  <th>Stok</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
-              <tbody id="stockTable"></tbody>
+              <tbody id="productTable"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- KEUANGAN -->
       <section class="page" id="page-keuangan">
-        <div class="section-head">
-          <div>
-            <h3>Pencatatan Keuangan</h3>
-            <p>Catat uang masuk dan uang keluar di setiap unit usaha.</p>
-          </div>
-        </div>
-
-        <div class="notice">
-          Pemasukan dari kasir dicatat otomatis sebagai omzet penjualan.
-          Jangan mencatat penjualan yang sama sekali lagi sebagai pemasukan
-          manual karena akan membuat laporan ganda.
-        </div>
-
-        <div class="columns">
-          <div class="panel">
-            <h3>Tambah Catatan Keuangan</h3>
-            <p class="panel-subtitle">Isi sesuai transaksi yang benar-benar terjadi.</p>
-
-            <form id="financeForm" class="form-stack">
-              <div class="field">
-                <label for="financeType">Jenis transaksi</label>
-                <select id="financeType">
-                  <option value="expense">Pengeluaran</option>
-                  <option value="income">Pemasukan lain</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="financeBusiness">Unit usaha</label>
-                <select id="financeBusiness">
-                  <option>Umum</option>
-                  <option>Pom Mini</option>
-                  <option>Minuman</option>
-                  <option>Toko Sayur</option>
-                  <option>Fotokopi</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="financeDescription">Keterangan</label>
-                <input id="financeDescription" required maxlength="120"
-                  placeholder="Contoh: beli bahan baku">
-              </div>
-
-              <div class="field">
-                <label for="financeAmount">Nominal (Rp)</label>
-                <input id="financeAmount" type="number" min="1" required
-                  placeholder="Masukkan nominal">
-              </div>
-
-              <div class="field">
-                <label for="financeDate">Tanggal transaksi</label>
-                <input id="financeDate" type="date" required>
-              </div>
-
-              <button class="btn" type="submit">Simpan Catatan</button>
-            </form>
-          </div>
-
-          <div class="panel">
-            <h3>Ringkasan Keuangan</h3>
-            <p class="panel-subtitle">Berdasarkan tanggal yang kamu pilih.</p>
-
-            <div class="field">
-              <label for="financePeriod">Periode ringkasan</label>
-              <select id="financePeriod">
-                <option value="day">Hari ini</option>
-                <option value="week">7 hari terakhir</option>
-                <option value="month">Bulan ini</option>
-                <option value="year">Tahun ini</option>
-                <option value="all">Semua tanggal</option>
-              </select>
-            </div>
-
-            <div class="report-cards" style="grid-template-columns:1fr;margin-top:18px">
-              <div class="report-card">
-                <p>Omzet Penjualan</p>
-                <strong id="financeSales">Rp0</strong>
-              </div>
-              <div class="report-card">
-                <p>Pemasukan Lain</p>
-                <strong id="financeIncome">Rp0</strong>
-              </div>
-              <div class="report-card">
-                <p>Pengeluaran</p>
-                <strong id="financeExpense">Rp0</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="panel">
-          <h3>Riwayat Pemasukan & Pengeluaran</h3>
+          <h3>Keuangan</h3>
+          <p class="muted">Ringkasan pemasukan dan keuntungan dari transaksi.</p>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Total Omzet</div>
+              <div class="value" id="financeRevenue">Rp0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Total Modal Terjual</div>
+              <div class="value" id="financeCost">Rp0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Perkiraan Laba</div>
+              <div class="value" id="financeProfit">Rp0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Jumlah Transaksi</div>
+              <div class="value" id="financeTransactions">0</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-laporan">
+        <div class="panel">
+          <h3>Laporan Usaha</h3>
+          <p class="muted">Riwayat penjualan dan ringkasan transaksi.</p>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Tanggal</th><th>Usaha</th><th>Jenis</th>
-                  <th>Keterangan</th><th>Nominal</th>
+                  <th>Nomor</th>
+                  <th>Tanggal</th>
+                  <th>Jumlah Item</th>
+                  <th>Total</th>
+                  <th>Laba</th>
                 </tr>
               </thead>
-              <tbody id="financeTable"></tbody>
+              <tbody id="reportTable"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- LAPORAN -->
-      <section class="page" id="page-laporan">
-        <div class="section-head">
-          <div>
-            <h3>Laporan Usaha</h3>
-            <p>Rekap transaksi menurut periode dan unit usaha.</p>
-          </div>
-          <button class="btn secondary no-print" id="exportCsv">Ekspor CSV</button>
-        </div>
-
-        <div class="panel">
-          <div class="toolbar">
-            <div class="field">
-              <label for="reportPeriod">Periode laporan</label>
-              <select id="reportPeriod">
-                <option value="day">Harian</option>
-                <option value="week">Mingguan</option>
-                <option value="month">Bulanan</option>
-                <option value="year">Tahunan</option>
-                <option value="all">Semua tanggal</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="reportBusiness">Unit usaha</label>
-              <select id="reportBusiness">
-                <option value="">Semua usaha</option>
-                <option>Pom Mini</option>
-                <option>Minuman</option>
-                <option>Toko Sayur</option>
-                <option>Fotokopi</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="reportStart">Tanggal awal (opsional)</label>
-              <input type="date" id="reportStart">
-            </div>
-            <div class="field">
-              <label for="reportEnd">Tanggal akhir (opsional)</label>
-              <input type="date" id="reportEnd">
-            </div>
-          </div>
-          <button class="btn" id="generateReport">Tampilkan Laporan</button>
-          <button class="btn secondary no-print" id="printReport">Cetak Laporan</button>
-        </div>
-
-        <div class="panel" id="reportOutput">
-          <h3>Hasil Rekapitulasi</h3>
-          <p class="panel-subtitle">Pilih periode untuk menampilkan laporan.</p>
-          <div class="report-cards">
-            <div class="report-card"><p>Omzet</p><strong id="reportSales">Rp0</strong></div>
-            <div class="report-card"><p>Modal Barang Terjual</p><strong id="reportCost">Rp0</strong></div>
-            <div class="report-card"><p>Laba Kotor</p><strong id="reportProfit">Rp0</strong></div>
-            <div class="report-card"><p>Pengeluaran Operasional</p><strong id="reportExpense">Rp0</strong></div>
-            <div class="report-card"><p>Pemasukan Lain</p><strong id="reportOtherIncome">Rp0</strong></div>
-            <div class="report-card"><p>Estimasi Hasil Bersih</p><strong id="reportNet">Rp0</strong></div>
-          </div>
-          <p class="panel-subtitle">
-            Hasil bersih di sini merupakan estimasi: laba kotor dikurangi
-            pengeluaran tercatat ditambah pemasukan lain. Kelengkapan biaya
-            dan pencatatan modal menentukan akurasinya.
-          </p>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Usaha</th><th>Jumlah Transaksi</th><th>Omzet</th><th>Modal Barang</th><th>Laba Kotor</th></tr>
-              </thead>
-              <tbody id="reportBusinessTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- AKTIVITAS -->
       <section class="page" id="page-aktivitas">
-        <div class="section-head">
-          <div>
-            <h3>Aktivitas & Pemeriksaan</h3>
-            <p>Catatan perubahan dan indikasi transaksi yang perlu ditinjau.</p>
-          </div>
-        </div>
-
-        <div class="notice warning">
-          Sistem ini hanya menandai indikasi kejanggalan berdasarkan data lokal.
-          Sistem tidak bisa memastikan seseorang melakukan kecurangan.
-          Catatan browser juga belum aman dari perubahan oleh pengguna yang
-          memiliki akses ke komputer.
-        </div>
-
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Total Aktivitas</span><span class="stat-icon">📋</span></div>
-            <h3 id="activityCount">0</h3>
-            <small>Catatan aktivitas yang tersimpan</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Perlu Ditinjau</span><span class="stat-icon">🔎</span></div>
-            <h3 id="suspiciousCount">0</h3>
-            <small>Catatan bertanda peringatan</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Stok Menipis</span><span class="stat-icon">📦</span></div>
-            <h3 id="activityStockCount">0</h3>
-            <small>Produk pada batas minimum atau di bawahnya</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Status QRIS</span><span class="stat-icon">📱</span></div>
-            <h3 id="qrisStatus" style="font-size:16px">Belum terintegrasi</h3>
-            <small>Belum terhubung ke penyedia pembayaran</small>
-          </div>
-        </div>
-
         <div class="panel">
-          <h3>Riwayat Aktivitas</h3>
-          <p class="panel-subtitle">Catatan yang dibuat oleh versi demo ini.</p>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Waktu</th><th>Aktivitas</th><th>Keterangan</th><th>Status</th></tr>
-              </thead>
-              <tbody id="activityTable"></tbody>
-            </table>
-          </div>
+          <h3>Aktivitas</h3>
+          <p class="muted">Catatan aktivitas yang dilakukan di aplikasi.</p>
+          <div id="activityList" class="empty">Belum ada aktivitas.</div>
         </div>
       </section>
 
-      <!-- HALAMAN UNIT USAHA -->
       <section class="page" id="page-unit">
-        <div class="welcome">
-          <div>
-            <h2 id="unitTitle">Unit Usaha</h2>
-            <p id="unitDescription">Kelola penjualan dan produk usaha.</p>
-          </div>
-          <div class="welcome-art" id="unitEmoji">🏪</div>
-        </div>
-
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Omzet Hari Ini</span><span class="stat-icon">💰</span></div>
-            <h3 id="unitSales">Rp0</h3>
-            <small>Transaksi yang tercatat hari ini</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Jumlah Produk</span><span class="stat-icon">📦</span></div>
-            <h3 id="unitProducts">0</h3>
-            <small>Produk yang terdaftar</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Stok Menipis</span><span class="stat-icon">⚠️</span></div>
-            <h3 id="unitLowStock">0</h3>
-            <small>Produk yang harus diperiksa</small>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top"><span class="stat-name">Transaksi Hari Ini</span><span class="stat-icon">🧾</span></div>
-            <h3 id="unitTransactions">0</h3>
-            <small>Jumlah transaksi tercatat</small>
-          </div>
-        </div>
-
         <div class="panel">
-          <h3>Produk Unit Usaha</h3>
-          <p class="panel-subtitle">Tambahkan produk melalui menu Produk & Stok.</p>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Produk</th><th>Modal</th><th>Harga Jual</th><th>Stok</th><th>Status</th></tr></thead>
-              <tbody id="unitProductTable"></tbody>
-            </table>
+          <h3>Unit Usaha</h3>
+          <p class="muted">
+            Data produk dan transaksi dikelola melalui aplikasi UsahaKu ini.
+          </p>
+          <div class="field">
+            <label for="businessName">Nama usaha</label>
+            <input id="businessName" placeholder="Masukkan nama usaha">
           </div>
-        </div>
-
-        <div class="panel">
-          <h3>Transaksi Unit Usaha</h3>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Waktu</th><th>Nominal</th><th>Pembayaran</th><th>Status</th></tr></thead>
-              <tbody id="unitTransactionTable"></tbody>
-            </table>
+          <div class="form-actions">
+            <button class="primary" id="saveBusinessBtn">Simpan Nama Usaha</button>
           </div>
         </div>
       </section>
 
-      <div class="footer">
-        UsahaKu © 2026 · Sistem Manajemen Usaha Terpadu<br>
-        Versi awal untuk uji coba lokal.
-      </div>
-    </div>
-  </main>
-</div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-<script>
-"use strict";
-
-/* =====================================
-   1. PENGATURAN DASAR
-===================================== */
-
-const STORAGE_KEY = "usahaku_data_v1";
-
-const BUSINESSES = {
-  "Pom Mini": {
-    emoji: "⛽",
-    description: "Pencatatan penjualan BBM, liter, harga, dan stok."
-  },
-  "Minuman": {
-    emoji: "🥤",
-    description: "Kasir minuman, menu, bahan baku, dan transaksi."
-  },
-  "Toko Sayur": {
-    emoji: "🥬",
-    description: "Pengelolaan stok sayur, berat, harga, dan barang rusak."
-  },
-  "Fotokopi": {
-    emoji: "🖨️",
-    description: "Layanan fotokopi, cetak, scan, kertas, dan ATK."
-  }
-};
-
-const money = value =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0
-  }).format(Number(value) || 0);
-
-const $ = id => document.getElementById(id);
-
-const localDate = (date = new Date()) => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-};
-
-const timestamp = () => new Date().toISOString();
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-function makeId() {
-  return Date.now().toString(36) +
-    Math.random().toString(36).slice(2, 9);
-}
-
-function seedProducts() {
-  return [
-    {id:makeId(),name:"Es Teh",business:"Minuman",cost:2000,price:5000,stock:30,min:5,unit:"gelas"},
-    {id:makeId(),name:"Es Jeruk",business:"Minuman",cost:3000,price:7000,stock:20,min:5,unit:"gelas"},
-    {id:makeId(),name:"Kopi Susu",business:"Minuman",cost:4000,price:8000,stock:15,min:4,unit:"gelas"},
-    {id:makeId(),name:"Air Mineral",business:"Minuman",cost:2000,price:4000,stock:24,min:5,unit:"botol"},
-    {id:makeId(),name:"Bensin (contoh)",business:"Pom Mini",cost:10000,price:12000,stock:50,min:10,unit:"liter"},
-    {id:makeId(),name:"Bayam (contoh)",business:"Toko Sayur",cost:2000,price:3000,stock:15,min:3,unit:"ikat"},
-    {id:makeId(),name:"Kangkung (contoh)",business:"Toko Sayur",cost:2000,price:3000,stock:12,min:3,unit:"ikat"},
-    {id:makeId(),name:"Kertas A4 (contoh)",business:"Fotokopi",cost:400,price:500,stock:500,min:50,unit:"lembar"},
-    {id:makeId(),name:"Fotokopi A4 (contoh)",business:"Fotokopi",cost:100,price:200,stock:1000,min:100,unit:"lembar"}
-  ];
-}
-
-function createInitialData() {
-  return {
-    products: seedProducts(),
-    transactions: [],
-    finance: [],
-    activities: [{
-      id: makeId(),
-      time: timestamp(),
-      action: "Sistem dibuat",
-      detail: "Website UsahaKu pertama kali dijalankan.",
-      warning: false
-    }]
-  };
-}
-
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-
-    if (!raw) return createInitialData();
-
-    const data = JSON.parse(raw);
-
-    if (
-      !data ||
-      !Array.isArray(data.products) ||
-      !Array.isArray(data.transactions) ||
-      !Array.isArray(data.finance) ||
-      !Array.isArray(data.activities)
-    ) {
-      throw new Error("Format data tidak sesuai.");
-    }
-
-    return data;
-  } catch (error) {
-    alert(
-      "Data lokal tidak dapat dibaca. " +
-      "Jangan menghapus data browser sebelum membuat cadangan."
-    );
-    return createInitialData();
-  }
-}
-
-let data = loadData();
-let cart = [];
-let currentBusiness = null;
-let toastTimer;
-
-function saveData() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return true;
-  } catch (error) {
-    notify("Penyimpanan browser gagal. Data mungkin tidak tersimpan.");
-    return false;
-  }
-}
-
-function logActivity(action, detail, warning = false) {
-  data.activities.unshift({
-    id: makeId(),
-    time: timestamp(),
-    action,
-    detail,
-    warning
-  });
-
-  data.activities = data.activities.slice(0, 1000);
-}
-
-function notify(message) {
-  const toast = $("toast");
-  toast.textContent = message;
-  toast.style.display = "block";
-
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.style.display = "none";
-  }, 3500);
-}
-
-function getProduct(id) {
-  return data.products.find(product => product.id === id);
-}
-
-function lowStockProducts() {
-  return data.products.filter(product =>
-    Number(product.stock) <= Number(product.min)
-  );
-}
-
-/* =====================================
-   2. NAVIGASI
-===================================== */
-
-const pageTitles = {
-  dashboard: ["Dashboard", "Pantau seluruh usaha dalam satu tempat."],
-  kasir: ["Kasir Minuman", "Kelola penjualan minuman."],
-  produk: ["Produk & Stok", "Kelola barang, harga, dan persediaan."],
-  keuangan: ["Keuangan", "Catat pemasukan dan pengeluaran."],
-  laporan: ["Laporan Usaha", "Evaluasi hasil usaha berdasarkan periode."],
-  aktivitas: ["Aktivitas", "Tinjau riwayat aktivitas dan peringatan."],
-  unit: ["Unit Usaha", "Ringkasan usaha yang dipilih."]
-};
-
-function showPage(page) {
-  document.querySelectorAll(".page").forEach(section => {
-    section.classList.toggle("active", section.id === `page-${page}`);
-  });
-
-  document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.remove("active");
-
-    if (button.dataset.page === page) {
-      button.classList.add("active");
-    }
-  });
-
-  $("pageTitle").textContent = pageTitles[page]?.[0] || "UsahaKu";
-  $("pageSubtitle").textContent = pageTitles[page]?.[1] || "";
-
-  if (page === "unit" && currentBusiness) {
-    $("pageTitle").textContent = currentBusiness;
-    $("pageSubtitle").textContent =
-      BUSINESSES[currentBusiness].description;
-  }
-
-  if (page === "kasir") renderDrinkProducts();
-  if (page === "produk") renderStockTable();
-  if (page === "keuangan") renderFinance();
-  if (page === "laporan") generateReport();
-  if (page === "aktivitas") renderActivities();
-  if (page === "unit") renderBusinessPage();
-
-  window.scrollTo({top: 0, behavior: "smooth"});
-}
-
-document.querySelectorAll("[data-page]").forEach(button => {
-  button.addEventListener("click", () => {
-    currentBusiness = null;
-    showPage(button.dataset.page);
-  });
-});
-
-document.querySelectorAll("[data-business]").forEach(button => {
-  button.addEventListener("click", () => openBusiness(button.dataset.business));
-});
-
-document.querySelectorAll("[data-open-business]").forEach(button => {
-  button.addEventListener("click", () => {
-    const business = button.dataset.openBusiness;
-
-    if (business === "Minuman") {
-      currentBusiness = null;
-      showPage("kasir");
-    } else {
-      openBusiness(business);
-    }
-  });
-});
-
-function openBusiness(business) {
-  currentBusiness = business;
-  showPage("unit");
-}
-
-/* =====================================
-   3. DASHBOARD
-===================================== */
-
-function getTransactionsInPeriod(period, business = "") {
-  const today = localDate();
-  const now = new Date();
-
-  let start = null;
-  let end = today;
-
-  if (period === "day") {
-    start = today;
-  } else if (period === "week") {
-    const d = new Date(now);
-    d.setDate(d.getDate() - 6);
-    start = localDate(d);
-  } else if (period === "month") {
-    start = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-01`;
-  } else if (period === "year") {
-    start = `${now.getFullYear()}-01-01`;
-  }
-
-  return data.transactions.filter(transaction => {
-    if (business && transaction.business !== business) return false;
-    if (start && transaction.date < start) return false;
-    if (end && transaction.date > end) return false;
-    return true;
-  });
-}
-
-function totalAmount(items, key = "total") {
-  return items.reduce((sum, item) => sum + Number(item[key] || 0), 0);
-}
-
-function getFinance(period, type = "") {
-  const now = new Date();
-  let start = null;
-  const today = localDate();
-
-  if (period === "day") start = today;
-
-  if (period === "week") {
-    const date = new Date(now);
-    date.setDate(date.getDate() - 6);
-    start = localDate(date);
-  }
-
-  if (period === "month") {
-    start = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-01`;
-  }
-
-  if (period === "year") {
-    start = `${now.getFullYear()}-01-01`;
-  }
-
-  return data.finance.filter(item =>
-    (!type || item.type === type) &&
-    (!start || item.date >= start) &&
-    item.date <= today
-  );
-}
-
-function renderDashboard() {
-  const sales = getTransactionsInPeriod("day");
-  const expenses = getFinance("day", "expense");
-  const low = lowStockProducts();
-
-  const revenue = totalAmount(sales);
-  const cost = sales.reduce((sum, transaction) =>
-    sum + Number(transaction.costTotal || 0), 0
-  );
-
-  $("dashIncome").textContent = money(revenue);
-  $("dashExpense").textContent = money(totalAmount(expenses, "amount"));
-  $("dashProfit").textContent = money(revenue - cost);
-  $("dashStock").textContent = low.length;
-
-  $("notificationCount").textContent = low.length;
-
-  const alerts = [];
-
-  low.forEach(product => {
-    alerts.push({
-      icon: "⚠️",
-      text: `${product.name}: stok ${product.stock} ${product.unit}, batas minimum ${product.min}.`,
-      danger: Number(product.stock) === 0
-    });
-  });
-
-  data.activities.filter(activity => activity.warning).slice(0, 3)
-    .forEach(activity => {
-      alerts.push({
-        icon: "🔎",
-        text: `${activity.action}: ${activity.detail}`,
-        danger: true
-      });
-    });
-
-  if (!alerts.length) {
-    alerts.push({
-      icon: "✅",
-      text: "Tidak ada peringatan stok. Tetap periksa catatan transaksi secara berkala.",
-      normal: true
-    });
-  }
-
-  $("dashboardAlerts").innerHTML = alerts.slice(0, 7).map(alert => `
-    <div class="alert-item ${alert.danger ? "danger" : alert.normal ? "normal" : ""}">
-      <span>${alert.icon}</span>
-      <span>${escapeHTML(alert.text)}</span>
-    </div>
-  `).join("");
-
-  const recent = [...data.transactions]
-    .sort((a,b) => b.time.localeCompare(a.time))
-    .slice(0, 8);
-
-  $("recentTransactions").innerHTML = recent.length ? recent.map(t => `
-    <tr>
-      <td>${escapeHTML(new Date(t.time).toLocaleString("id-ID"))}</td>
-      <td>${escapeHTML(t.business)}</td>
-      <td>${money(t.total)}</td>
-      <td>${escapeHTML(t.payment)}</td>
-      <td><span class="pill ${t.status === "Tercatat" ? "green" : "yellow"}">${escapeHTML(t.status)}</span></td>
-    </tr>
-  `).join("") : `
-    <tr><td colspan="5" class="empty">Belum ada transaksi penjualan.</td></tr>
-  `;
-
-  renderChart();
-}
-
-function renderChart() {
-  const today = new Date();
-  const days = [];
-
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const key = localDate(date);
-
-    const total = totalAmount(
-      data.transactions.filter(transaction => transaction.date === key)
-    );
-
-    days.push({
-      label: date.toLocaleDateString("id-ID", {day:"numeric",month:"short"}),
-      total
-    });
-  }
-
-  const max = Math.max(...days.map(day => day.total), 1);
-
-  $("salesChart").innerHTML = days.map(day => `
-    <div class="chart-column" title="${money(day.total)}">
-      <div class="bar" style="height:${Math.max(3, day.total / max * 125)}px"></div>
-      <small>${escapeHTML(day.label)}</small>
-    </div>
-  `).join("");
-}
-
-/* =====================================
-   4. KASIR MINUMAN
-===================================== */
-
-function renderDrinkProducts() {
-  const search = $("productSearch").value.trim().toLowerCase();
-
-  const products = data.products.filter(product =>
-    product.business === "Minuman" &&
-    product.name.toLowerCase().includes(search)
-  );
-
-  $("drinkProducts").innerHTML = products.length ? products.map(product => `
-    <div class="product-card">
-      <div class="product-emoji">🥤</div>
-      <h4>${escapeHTML(product.name)}</h4>
-      <p>Stok: ${product.stock} ${escapeHTML(product.unit)}</p>
-      <strong>${money(product.price)}</strong>
-      <button class="btn" data-add-cart="${escapeHTML(product.id)}"
-        ${Number(product.stock) <= 0 ? "disabled" : ""}>
-        ${Number(product.stock) <= 0 ? "Stok Habis" : "+ Tambah"}
-      </button>
-    </div>
-  `).join("") : `<div class="empty">Produk tidak ditemukan.</div>`;
-
-  $("drinkProducts").querySelectorAll("[data-add-cart]").forEach(button => {
-    button.addEventListener("click", () => addToCart(button.dataset.addCart));
-  });
-
-  renderCart();
-}
-
-function addToCart(id) {
-  const product = getProduct(id);
-
-  if (!product || product.business !== "Minuman") {
-    notify("Produk tidak ditemukan.");
-    return;
-  }
-
-  const existing = cart.find(item => item.id === id);
-  const quantity = existing ? existing.quantity : 0;
-
-  if (quantity + 1 > Number(product.stock)) {
-    notify("Jumlah pesanan melebihi stok tersedia.");
-    return;
-  }
-
-  if (existing) existing.quantity++;
-  else cart.push({id, quantity:1});
-
-  renderCart();
-}
-
-function cartSubtotal() {
-  return cart.reduce((sum, item) => {
-    const product = getProduct(item.id);
-    return sum + (product ? Number(product.price) * item.quantity : 0);
-  }, 0);
-}
-
-function cartDiscount() {
-  const input = Math.max(0, Number($("discountInput").value) || 0);
-  return Math.min(input, cartSubtotal());
-}
-
-function cartTotal() {
-  return Math.max(0, cartSubtotal() - cartDiscount());
-}
-
-function renderCart() {
-  $("cartItems").innerHTML = cart.length ? cart.map(item => {
-    const product = getProduct(item.id);
-    if (!product) return "";
-
-    return `
-      <div class="cart-row">
-        <div>
-          <strong>${escapeHTML(product.name)}</strong><br>
-          ${item.quantity} × ${money(product.price)}
-        </div>
-        <div>
-          <strong>${money(product.price * item.quantity)}</strong>
-          <button data-remove-cart="${escapeHTML(item.id)}" title="Hapus">×</button>
-        </div>
-      </div>
-    `;
-  }).join("") : `<div class="empty">Keranjang masih kosong.<br>Pilih menu minuman terlebih dahulu.</div>`;
-
-  $("cartItems").querySelectorAll("[data-remove-cart]").forEach(button => {
-    button.addEventListener("click", () => {
-      cart = cart.filter(item => item.id !== button.dataset.removeCart);
-      renderCart();
-    });
-  });
-
-  $("cartSubtotal").textContent = money(cartSubtotal());
-  $("cartTotal").textContent = money(cartTotal());
-
-  updateChange();
-}
-
-function updateChange() {
-  const method = $("paymentMethod").value;
-  const cashField = $("cashField");
-
-  cashField.style.display = method === "Tunai" ? "grid" : "none";
-
-  const received = Math.max(0, Number($("cashReceived").value) || 0);
-
-  $("changeAmount").textContent = method === "Tunai"
-    ? money(Math.max(0, received - cartTotal()))
-    : money(0);
-}
-
-$("productSearch").addEventListener("input", renderDrinkProducts);
-$("discountInput").addEventListener("input", renderCart);
-$("cashReceived").addEventListener("input", updateChange);
-$("paymentMethod").addEventListener("change", updateChange);
-
-$("clearCartBtn").addEventListener("click", () => {
-  cart = [];
-  $("discountInput").value = 0;
-  $("cashReceived").value = "";
-  renderCart();
-});
-
-$("checkoutBtn").addEventListener("click", () => {
-  if (!cart.length) {
-    notify("Keranjang masih kosong.");
-    return;
-  }
-
-  const total = cartTotal();
-  const method = $("paymentMethod").value;
-  const received = Number($("cashReceived").value) || 0;
-
-  if (total <= 0) {
-    notify("Total transaksi harus lebih dari nol.");
-    return;
-  }
-
-  if (method === "Tunai" && received < total) {
-    notify("Uang yang diterima belum mencukupi.");
-    return;
-  }
-
-  if (method === "QRIS") {
-    notify("QRIS belum terhubung. Jangan tandai pembayaran sebagai lunas sebelum diverifikasi.");
-    return;
-  }
-
-  if (method === "Transfer") {
-    notify("Pastikan transfer benar-benar diterima sebelum menyimpan transaksi.");
-    return;
-  }
-
-  const items = [];
-
-  for (const cartItem of cart) {
-    const product = getProduct(cartItem.id);
-
-    if (!product || product.business !== "Minuman") {
-      notify("Ada produk yang tidak valid.");
-      return;
-    }
-
-    if (cartItem.quantity > Number(product.stock)) {
-      notify(`Stok ${product.name} tidak mencukupi.`);
-      return;
-    }
-
-    items.push({
-      productId: product.id,
-      name: product.name,
-      quantity: cartItem.quantity,
-      price: Number(product.price),
-      cost: Number(product.cost),
-      subtotal: Number(product.price) * cartItem.quantity,
-      costTotal: Number(product.cost) * cartItem.quantity
-    });
-  }
-
-  const subtotal = cartSubtotal();
-  const discount = cartDiscount();
-
-  const transaction = {
-    id: makeId(),
-    time: timestamp(),
-    date: localDate(),
-    business: "Minuman",
-    items,
-    subtotal,
-    discount,
-    total,
-    costTotal: items.reduce((sum, item) => sum + item.costTotal, 0),
-    payment: method,
-    status: "Tercatat",
-    received: method === "Tunai" ? received : total,
-    change: method === "Tunai" ? received - total : 0
-  };
-
-  items.forEach(item => {
-    const product = getProduct(item.productId);
-    product.stock = Number(product.stock) - item.quantity;
-  });
-
-  data.transactions.push(transaction);
-
-  logActivity(
-    "Penjualan tercatat",
-    `Transaksi minuman ${transaction.id}, nominal ${money(total)}.`,
-    false
-  );
-
-  if (!saveData()) return;
-
-  cart = [];
-  $("discountInput").value = 0;
-  $("cashReceived").value = "";
-
-  renderDrinkProducts();
-  renderAll();
-  notify("Transaksi berhasil dicatat.");
-});
-
-/* =====================================
-   5. PRODUK DAN STOK
-   DESAIN LAMA TETAP DIPAKAI
-===================================== */
-
-let editingProductId = null;
-
-$("showProductForm").addEventListener("click", () => {
-  editingProductId = null;
-
-  $("productForm").reset();
-  $("productFormPanel").querySelector("h3").textContent =
-    "Tambah Produk Baru";
-
-  $("productFormPanel").querySelector(
-    'button[type="submit"]'
-  ).textContent = "Simpan Produk";
-
-  $("productFormPanel").style.display = "block";
-  $("newProductName").focus();
-});
-
-$("cancelProductForm").addEventListener("click", () => {
-  editingProductId = null;
-  $("productForm").reset();
-
-  $("productFormPanel").style.display = "none";
-  $("productFormPanel").querySelector("h3").textContent =
-    "Tambah Produk Baru";
-
-  $("productFormPanel").querySelector(
-    'button[type="submit"]'
-  ).textContent = "Simpan Produk";
-});
-
-$("productForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const name = $("newProductName").value.trim();
-  const business = $("newProductBusiness").value;
-  const cost = Number($("newProductCost").value);
-  const price = Number($("newProductPrice").value);
-  const stock = Number($("newProductStock").value);
-  const min = Number($("newProductMinimum").value);
-  const unit = $("newProductUnit").value;
-
-  if (!name || !Object.hasOwn(BUSINESSES, business)) {
-    notify("Nama produk atau unit usaha tidak valid.");
-    return;
-  }
-
-  if (![cost, price, stock, min].every(Number.isFinite) ||
-      cost < 0 || price < 0 || stock < 0 || min < 0) {
-    notify("Periksa kembali harga dan jumlah stok.");
-    return;
-  }
-
-  if (price < cost) {
-    if (!confirm(
-      "Harga jual lebih rendah daripada modal. Tetap simpan?"
-    )) return;
-  }
-
-  const productData = {
-    name,
-    business,
-    cost,
-    price,
-    stock,
-    min,
-    unit
-  };
-
-  if (editingProductId) {
-    const product = getProduct(editingProductId);
-
-    if (!product) {
-      notify("Produk tidak ditemukan.");
-      return;
-    }
-
-    const oldName = product.name;
-
-    Object.assign(product, productData);
-
-    logActivity(
-      "Produk diedit",
-      `${oldName} diperbarui menjadi ${name}.`,
-      false
-    );
-  } else {
-    data.products.push({
-      id: makeId(),
-      ...productData
-    });
-
-    logActivity(
-      "Produk ditambahkan",
-      `${name} ditambahkan ke unit ${business}.`,
-      false
-    );
-  }
-
-  if (!saveData()) return;
-
-  editingProductId = null;
-  $("productForm").reset();
-  $("productFormPanel").style.display = "none";
-
-  $("productFormPanel").querySelector("h3").textContent =
-    "Tambah Produk Baru";
-
-  $("productFormPanel").querySelector(
-    'button[type="submit"]'
-  ).textContent = "Simpan Produk";
-
-  renderAll();
-  renderDrinkProducts();
-
-  notify("Data produk berhasil disimpan.");
-});
-
-$("stockSearch").addEventListener("input", renderStockTable);
-$("stockBusinessFilter").addEventListener("change", renderStockTable);
-
-function stockStatus(product) {
-  if (Number(product.stock) <= 0) {
-    return '<span class="pill red">Habis</span>';
-  }
-
-  if (Number(product.stock) <= Number(product.min)) {
-    return '<span class="pill yellow">Menipis</span>';
-  }
-
-  return '<span class="pill green">Aman</span>';
-}
-
-function renderStockTable() {
-  const search = $("stockSearch").value.trim().toLowerCase();
-  const business = $("stockBusinessFilter").value;
-
-  const products = data.products.filter(product =>
-    product.name.toLowerCase().includes(search) &&
-    (!business || product.business === business)
-  );
-
-  $("stockTable").innerHTML = products.length
-    ? products.map(product => `
-      <tr>
-        <td>${escapeHTML(product.name)}</td>
-        <td>${escapeHTML(product.business)}</td>
-        <td>${money(product.cost)}</td>
-        <td>${money(product.price)}</td>
-        <td>${product.stock} ${escapeHTML(product.unit)}</td>
-        <td>${stockStatus(product)}</td>
-        <td>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button class="btn secondary"
-              data-edit-product="${escapeHTML(product.id)}">
-              Edit
-            </button>
-
-            <button class="btn secondary"
-              data-stock="${escapeHTML(product.id)}">
-              Ubah Stok
-            </button>
-
-            <button class="btn danger"
-              data-delete-product="${escapeHTML(product.id)}">
-              Hapus
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join("")
-    : `<tr><td colspan="7" class="empty">
-        Produk tidak ditemukan.
-      </td></tr>`;
-
-  $("stockTable").querySelectorAll("[data-edit-product]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        editProduct(button.dataset.editProduct);
-      });
-    });
-
-  $("stockTable").querySelectorAll("[data-stock]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        adjustStock(button.dataset.stock);
-      });
-    });
-
-  $("stockTable").querySelectorAll("[data-delete-product]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        deleteProduct(button.dataset.deleteProduct);
-      });
-    });
-}
-
-function editProduct(id) {
-  const product = getProduct(id);
-  if (!product) {
-    notify("Produk tidak ditemukan.");
-    return;
-  }
-
-  editingProductId = id;
-
-  $("newProductName").value = product.name;
-  $("newProductBusiness").value = product.business;
-  $("newProductCost").value = product.cost;
-  $("newProductPrice").value = product.price;
-  $("newProductStock").value = product.stock;
-  $("newProductMinimum").value = product.min;
-  $("newProductUnit").value = product.unit;
-
-  $("productFormPanel").querySelector("h3").textContent =
-    "Edit Produk";
-
-  $("productFormPanel").querySelector(
-    'button[type="submit"]'
-  ).textContent = "Simpan Perubahan";
-
-  $("productFormPanel").style.display = "block";
-
-  $("productFormPanel").scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-
-  $("newProductName").focus();
-}
-
-function deleteProduct(id) {
-  const product = getProduct(id);
-  if (!product) {
-    notify("Produk tidak ditemukan.");
-    return;
-  }
-
-  const relatedTransactions = data.transactions.some(transaction =>
-    transaction.items.some(item => item.productId === id)
-  );
-
-  let message = `Yakin ingin menghapus produk "${product.name}"?`;
-
-  if (relatedTransactions) {
-    message +=
-      "\n\nProduk ini tercatat dalam transaksi sebelumnya. " +
-      "Riwayat transaksi lama tetap dipertahankan.";
-  }
-
-  if (!confirm(message)) return;
-
-  data.products = data.products.filter(item => item.id !== id);
-
-  // Hapus produk dari keranjang kasir jika masih dipilih.
-  cart = cart.filter(item => item.id !== id);
-
-  logActivity(
-    "Produk dihapus",
-    `${product.name} dihapus dari daftar produk.`,
-    false
-  );
-
-  if (!saveData()) return;
-
-  if (editingProductId === id) {
-    editingProductId = null;
-    $("productForm").reset();
-    $("productFormPanel").style.display = "none";
-  }
-
-  renderAll();
-  renderDrinkProducts();
-
-  notify("Produk berhasil dihapus.");
-}
-
-function adjustStock(id) {
-  const product = getProduct(id);
-  if (!product) return;
-
-  const answer = prompt(
-    `Stok saat ini ${product.stock} ${product.unit}.\n` +
-    `Masukkan stok terbaru untuk ${product.name}:`
-  );
-
-  if (answer === null || answer.trim() === "") return;
-
-  const newStock = Number(answer);
-
-  if (!Number.isFinite(newStock) || newStock < 0) {
-    notify("Stok harus berupa angka nol atau lebih.");
-    return;
-  }
-
-  const oldStock = Number(product.stock);
-  const difference = newStock - oldStock;
-
-  if (difference !== 0) {
-    logActivity(
-      "Penyesuaian stok",
-      `${product.name}: stok ${oldStock} menjadi ${newStock}.`,
-      difference < 0
-    );
-  }
-
-  product.stock = newStock;
-
-  if (!saveData()) return;
-
-  renderAll();
-  renderDrinkProducts();
-
-  notify("Stok berhasil diperbarui.");
-}
-
-/* =====================================
-   6. KEUANGAN
-===================================== */
-
-$("financeDate").value = localDate();
-
-$("financePeriod").addEventListener("change", renderFinance);
-
-$("financeForm").addEventListener("submit", event => {
-  event.preventDefault();
-
-  const type = $("financeType").value;
-  const business = $("financeBusiness").value;
-  const description = $("financeDescription").value.trim();
-  const amount = Number($("financeAmount").value);
-  const date = $("financeDate").value;
-
-  if (!description || !Number.isFinite(amount) || amount <= 0 || !date) {
-    notify("Lengkapi data keuangan dengan benar.");
-    return;
-  }
-
-  if (date > localDate()) {
-    notify("Tanggal transaksi tidak boleh di masa depan.");
-    return;
-  }
-
-  data.finance.push({
-    id: makeId(),
-    type,
-    business,
-    description,
-    amount,
-    date,
-    time: timestamp()
-  });
-
-  logActivity(
-    type === "expense" ? "Pengeluaran dicatat" : "Pemasukan lain dicatat",
-    `${description}: ${money(amount)} (${business}).`,
-    false
-  );
-
-  if (!saveData()) return;
-
-  $("financeForm").reset();
-  $("financeDate").value = localDate();
-
-  renderAll();
-  notify("Catatan keuangan berhasil disimpan.");
-});
-
-function renderFinance() {
-  const period = $("financePeriod").value;
-  const sales = getTransactionsInPeriod(period);
-  const income = getFinance(period, "income");
-  const expenses = getFinance(period, "expense");
-
-  $("financeSales").textContent = money(totalAmount(sales));
-  $("financeIncome").textContent = money(totalAmount(income, "amount"));
-  $("financeExpense").textContent = money(totalAmount(expenses, "amount"));
-
-  const entries = [
-    ...data.finance.map(item => ({
-      date: item.date,
-      business: item.business,
-      type: item.type,
-      description: item.description,
-      amount: item.amount,
-      time: item.time
-    }))
-  ].sort((a,b) => b.time.localeCompare(a.time));
-
-  $("financeTable").innerHTML = entries.length ? entries.map(item => `
-    <tr>
-      <td>${escapeHTML(item.date)}</td>
-      <td>${escapeHTML(item.business)}</td>
-      <td><span class="pill ${item.type === "income" ? "green" : "red"}">
-        ${item.type === "income" ? "Pemasukan" : "Pengeluaran"}
-      </span></td>
-      <td>${escapeHTML(item.description)}</td>
-      <td>${money(item.amount)}</td>
-    </tr>
-  `).join("") : `<tr><td colspan="5" class="empty">Belum ada catatan keuangan manual.</td></tr>`;
-}
-
-/* =====================================
-   7. LAPORAN
-===================================== */
-
-function selectReportTransactions() {
-  const period = $("reportPeriod").value;
-  const business = $("reportBusiness").value;
-  const startInput = $("reportStart").value;
-  const endInput = $("reportEnd").value;
-
-  if (startInput && endInput && startInput > endInput) {
-    notify("Tanggal awal tidak boleh melewati tanggal akhir.");
-    return null;
-  }
-
-  let transactions = getTransactionsInPeriod(period, business);
-
-  if (startInput) {
-    transactions = transactions.filter(t => t.date >= startInput);
-  }
-
-  if (endInput) {
-    transactions = transactions.filter(t => t.date <= endInput);
-  }
-
-  return transactions;
-}
-
-function generateReport() {
-  const transactions = selectReportTransactions();
-  if (!transactions) return;
-
-  const period = $("reportPeriod").value;
-  const business = $("reportBusiness").value;
-  const startInput = $("reportStart").value;
-  const endInput = $("reportEnd").value;
-
-  const finance = data.finance.filter(item => {
-    if (business && item.business !== business && item.business !== "Umum") return false;
-    if (startInput && item.date < startInput) return false;
-    if (endInput && item.date > endInput) return false;
-
-    if (!startInput && !endInput) {
-      const dates = getFinance(period);
-      return dates.some(entry => entry.id === item.id);
-    }
-
-    return true;
-  });
-
-  const sales = totalAmount(transactions);
-  const cost = totalAmount(transactions, "costTotal");
-  const profit = sales - cost;
-  const expense = totalAmount(finance.filter(item => item.type === "expense"), "amount");
-  const otherIncome = totalAmount(finance.filter(item => item.type === "income"), "amount");
-
-  $("reportSales").textContent = money(sales);
-  $("reportCost").textContent = money(cost);
-  $("reportProfit").textContent = money(profit);
-  $("reportExpense").textContent = money(expense);
-  $("reportOtherIncome").textContent = money(otherIncome);
-  $("reportNet").textContent = money(profit - expense + otherIncome);
-
-  const businesses = business ? [business] : Object.keys(BUSINESSES);
-
-  $("reportBusinessTable").innerHTML = businesses.map(name => {
-    const rows = transactions.filter(t => t.business === name);
-    const omzet = totalAmount(rows);
-    const modal = totalAmount(rows, "costTotal");
-
-    return `
-      <tr>
-        <td>${escapeHTML(name)}</td>
-        <td>${rows.length}</td>
-        <td>${money(omzet)}</td>
-        <td>${money(modal)}</td>
-        <td>${money(omzet - modal)}</td>
-      </tr>
-    `;
-  }).join("");
-}
-
-$("generateReport").addEventListener("click", generateReport);
-
-$("reportPeriod").addEventListener("change", () => {
-  $("reportStart").value = "";
-  $("reportEnd").value = "";
-});
-
-$("printReport").addEventListener("click", () => {
-  generateReport();
-  window.print();
-});
-
-$("exportCsv").addEventListener("click", () => {
-  const transactions = selectReportTransactions();
-  if (!transactions) return;
-
-  const rows = [
-    ["Tanggal","ID Transaksi","Usaha","Subtotal","Diskon","Omzet","Modal Barang","Laba Kotor","Pembayaran","Status"],
-    ...transactions.map(t => [
-      t.date, t.id, t.business, t.subtotal, t.discount,
-      t.total, t.costTotal, t.total - t.costTotal, t.payment, t.status
-    ])
-  ];
-
-  const csv = "\uFEFF" + rows.map(row =>
-    row.map(value =>
-      '"' + String(value ?? "").replace(/"/g, '""') + '"'
-    ).join(";")
-  ).join("\r\n");
-
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = `laporan-usahaku-${localDate()}.csv`;
-
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  URL.revokeObjectURL(url);
-  notify("Laporan transaksi berhasil diekspor.");
-});
-
-/* =====================================
-   8. AKTIVITAS & PEMERIKSAAN
-===================================== */
-
-function renderActivities() {
-  const warnings = data.activities.filter(activity => activity.warning);
-
-  $("activityCount").textContent = data.activities.length;
-  $("suspiciousCount").textContent = warnings.length;
-  $("activityStockCount").textContent = lowStockProducts().length;
-  $("qrisStatus").textContent = "Belum terintegrasi";
-
-  $("activityTable").innerHTML = data.activities.length
-    ? data.activities.map(activity => `
-      <tr>
-        <td>${escapeHTML(new Date(activity.time).toLocaleString("id-ID"))}</td>
-        <td>${escapeHTML(activity.action)}</td>
-        <td>${escapeHTML(activity.detail)}</td>
-        <td>
-          <span class="pill ${activity.warning ? "yellow" : "green"}">
-            ${activity.warning ? "Perlu ditinjau" : "Informasi"}
-          </span>
-        </td>
-      </tr>
-    `).join("")
-    : `<tr><td colspan="4" class="empty">Belum ada aktivitas.</td></tr>`;
-}
-
-$("notificationBtn").addEventListener("click", () => {
-  const low = lowStockProducts();
-
-  if (!low.length) {
-    notify("Tidak ada peringatan stok menipis.");
-    return;
-  }
-
-  const message = low.map(product =>
-    `${product.name}: ${product.stock} ${product.unit}`
-  ).join("\n");
-
-  alert("PERINGATAN STOK\n\n" + message);
-});
-
-/* =====================================
-   9. HALAMAN DETAIL UNIT USAHA
-===================================== */
-
-function renderBusinessPage() {
-  const business = currentBusiness;
-  if (!business) return;
-
-  const info = BUSINESSES[business];
-  const products = data.products.filter(p => p.business === business);
-  const transactions = getTransactionsInPeriod("day", business);
-
-  $("unitTitle").textContent = business;
-  $("unitDescription").textContent = info.description;
-  $("unitEmoji").textContent = info.emoji;
-  $("unitSales").textContent = money(totalAmount(transactions));
-  $("unitProducts").textContent = products.length;
-  $("unitLowStock").textContent = products.filter(p =>
-    Number(p.stock) <= Number(p.min)
-  ).length;
-  $("unitTransactions").textContent = transactions.length;
-
-  $("unitProductTable").innerHTML = products.length ? products.map(p => `
-    <tr>
-      <td>${escapeHTML(p.name)}</td>
-      <td>${money(p.cost)}</td>
-      <td>${money(p.price)}</td>
-      <td>${p.stock} ${escapeHTML(p.unit)}</td>
-      <td>${stockStatus(p)}</td>
-    </tr>
-  `).join("") : `<tr><td colspan="5" class="empty">Belum ada produk.</td></tr>`;
-
-  $("unitTransactionTable").innerHTML = transactions.length
-    ? transactions.map(t => `
-      <tr>
-        <td>${escapeHTML(new Date(t.time).toLocaleString("id-ID"))}</td>
-        <td>${money(t.total)}</td>
-        <td>${escapeHTML(t.payment)}</td>
-        <td>${escapeHTML(t.status)}</td>
-      </tr>
-    `).join("")
-    : `<tr><td colspan="4" class="empty">
-      Belum ada transaksi. Penjualan otomatis baru tersedia untuk kasir minuman.
-    </td></tr>`;
-}
-
-/* =====================================
-   10. REFRESH SEMUA TAMPILAN
-===================================== */
-
-function renderAll() {
-  renderDashboard();
-  renderStockTable();
-  renderFinance();
-  renderActivities();
-
-  if (currentBusiness) renderBusinessPage();
-}
-
-$("todayLabel").textContent = new Date().toLocaleDateString("id-ID", {
-  weekday:"short",
-  day:"numeric",
-  month:"short",
-  year:"numeric"
-});
-
-renderAll();
-renderDrinkProducts();
-generateReport();
-</script>
+      <div class="footer">UsahaKu · Manajemen Usaha Sederhana</div>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    // KODE JAVASCRIPT AKAN DILANJUTKAN DI BAGIAN BERIKUTNYA.
+  </script>
 </body>
 </html>
