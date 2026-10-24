@@ -166,10 +166,31 @@ tbody tr:last-child td {border-bottom:0}
   body {background:white}
   .card {break-inside:avoid}
 }
+
+/* Login and cloud-sync additions */
+.auth-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{width:min(100%,420px);background:var(--card);border:1px solid #e4e9f2;border-radius:18px;padding:28px;box-shadow:0 18px 50px rgba(23,32,51,.12)}
+.auth-card h2{margin:0 0 8px}.auth-card p{color:var(--muted);font-size:14px;line-height:1.5}.auth-card label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}.auth-card input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #d6dce8;border-radius:9px;font:inherit}.auth-card button{width:100%;margin-top:16px;padding:12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:700;cursor:pointer}.auth-error{color:#b91c1c!important;min-height:18px}.cloud-user{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cloud-user button{border:1px solid #d6dce8;background:white;border-radius:8px;padding:7px 10px;cursor:pointer;color:var(--text)}
+
 </style>
 </head>
 <body>
-<div class="layout">
+<div class="auth-screen" id="authScreen">
+  <form class="auth-card" id="loginForm">
+    <div class="brand">Usaha<span>Ku</span></div>
+    <h2>Masuk ke UsahaKu</h2>
+    <p>Masuk dengan akun pemilik untuk menyinkronkan data di laptop dan HP.</p>
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" type="email" autocomplete="username" required placeholder="Email akun Firebase">
+    <label for="loginPassword">Kata sandi</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Kata sandi akun Firebase">
+    <button id="loginButton" type="submit">Masuk</button>
+    <p class="auth-error" id="authError" role="alert"></p>
+    <p>Gunakan akun yang sudah dibuat di Firebase Authentication. Jangan bagikan kata sandi kepada siapa pun.</p>
+  </form>
+</div>
+
+<div class="layout" id="appLayout" style="display:none">
   <aside class="sidebar">
     <div class="brand">Usaha<span>Ku</span></div>
     <div class="brand-sub">Manajemen usaha sederhana</div>
@@ -190,7 +211,7 @@ tbody tr:last-child td {border-bottom:0}
         <h1 id="pageTitle">Dashboard</h1>
         <div class="muted" id="pageSubtitle">Ringkasan kondisi usahamu.</div>
       </div>
-      <div class="muted small" id="todayLabel"></div>
+      <div class="cloud-user"><span class="muted small" id="cloudStatus">Belum tersambung</span><button type="button" id="logoutButton">Keluar</button><span class="muted small" id="todayLabel"></span></div>
     </header>
 
     <section class="page active" id="page-dashboard">
@@ -317,7 +338,8 @@ tbody tr:last-child td {border-bottom:0}
     </section>
 
     <section class="page" id="page-reports">
-      <div class="card form-card no-print">
+
+          <div class="card form-card no-print">
         <h2>Filter Laporan</h2>
         <div class="form-grid">
           <div class="field"><label for="reportStart">Dari tanggal</label><input id="reportStart" type="date"></div>
@@ -370,6 +392,9 @@ tbody tr:last-child td {border-bottom:0}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
 
@@ -409,9 +434,30 @@ function loadData() {
 let data = loadData();
 let cart = [];
 let toastTimer;
+let cloudReady = false;
+let cloudDoc = null;
+let cloudUnsubscribe = null;
+let cloudWriteChain = Promise.resolve();
+let applyingCloudData = false;
+
 function save() {
   try {
     localStorage.setItem(KEY,JSON.stringify(data));
+    if (cloudReady && cloudDoc && !applyingCloudData) {
+      const snapshot = JSON.parse(JSON.stringify(data));
+      cloudWriteChain = cloudWriteChain.then(() => cloudDoc.set({
+        data: snapshot,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      })).then(() => {
+        const status = $("cloudStatus");
+        if (status) status.textContent = "Tersinkron ke cloud";
+      }).catch(err => {
+        console.error("Cloud save error:", err);
+        const status = $("cloudStatus");
+        if (status) status.textContent = "Gagal sinkron—periksa koneksi";
+        toast("Data tersimpan di perangkat, tetapi gagal disinkronkan ke cloud. Periksa koneksi dan aturan Firestore.");
+      });
+    }
     return true;
   } catch {
     toast("Penyimpanan gagal. Ekspor cadangan dan periksa ruang browser.");
@@ -454,47 +500,74 @@ function showPage(name) {
   };
   $("pageTitle").textContent=titles[name][0];
   $("pageSubtitle").textContent=titles[name][1];
-  if(name==="dashboard") renderDashboard();
-  if(name==="products") renderProducts();
-  if(name==="cashier") renderCashier();
-  if(name==="finance") renderFinance();
-  if(name==="reports") renderReport();
+}
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>showPage(btn.dataset.page)));
+
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p =>
+    p.classList.toggle("active", p.id === "page-" + name)
+  );
+  document.querySelectorAll(".nav-btn").forEach(b =>
+    b.classList.toggle("active", b.dataset.page === name)
+  );
+  const titles = {
+    dashboard:["Dashboard","Ringkasan kondisi usahamu."],
+    cashier:["Kasir","Catat penjualan dengan cepat."],
+    products:["Produk & Stok","Kelola produk dan persediaan."],
+    finance:["Keuangan","Catat pemasukan dan pengeluaran."],
+    reports:["Laporan","Lihat hasil usaha berdasarkan tanggal."],
+    settings:["Data & Cadangan","Kelola dan amankan data usaha."]
+  };
+  $("pageTitle").textContent = titles[name][0];
+  $("pageSubtitle").textContent = titles[name][1];
+  if (name === "dashboard") renderDashboard();
+  if (name === "products") renderProducts();
+  if (name === "cashier") renderCashier();
+  if (name === "finance") renderFinance();
+  if (name === "reports") renderReport();
   window.scrollTo({top:0,behavior:"smooth"});
 }
-document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 
 function renderDashboard() {
-  const tx=todayTransactions();
-  const sales=sum(tx,"total");
-  const profit=tx.reduce((a,t)=>a+Number(t.profit||0),0);
-  const low=data.products.filter(p=>Number(p.stock)<=Number(p.min));
-  $("dashSales").textContent=money(sales);
-  $("dashProfit").textContent=money(profit);
-  $("dashCount").textContent=tx.length;
-  $("dashLow").textContent=low.length;
+  const tx = todayTransactions();
+  const sales = sum(tx,"total");
+  const profit = tx.reduce((a,t)=>a+Number(t.profit||0),0);
+  const low = data.products.filter(p=>Number(p.stock)<=Number(p.min));
 
-  $("lowStockList").innerHTML=low.length?low.map(p=>`
+  $("dashSales").textContent = money(sales);
+  $("dashProfit").textContent = money(profit);
+  $("dashCount").textContent = tx.length;
+  $("dashLow").textContent = low.length;
+
+  $("lowStockList").innerHTML = low.length ? low.map(p=>`
     <div class="summary-line">
       <span>${safe(p.name)}<br><small class="muted">${p.stock} ${safe(p.unit)} tersisa</small></span>
       ${statusStock(p)}
-    </div>`).join(""):'<p class="muted">Semua stok berada di atas batas minimum.</p>';
+    </div>`).join("") : '<p class="muted">Semua stok berada di atas batas minimum.</p>';
 
-  const recent=[...data.transactions].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8);
-  $("recentTransactions").innerHTML=recent.length?recent.map(t=>`
-    <tr><td>${safe(t.date)}</td><td>${safe(t.items.map(i=>i.name+" ×"+i.qty).join(", "))}</td>
+  const recent = [...data.transactions]
+    .sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""))
+    .slice(0,8);
+
+  $("recentTransactions").innerHTML = recent.length ? recent.map(t=>`
+    <tr><td>${safe(t.date)}</td>
+    <td>${safe((t.items||[]).map(i=>i.name+" ×"+i.qty).join(", "))}</td>
     <td>${money(t.total)}</td><td>${safe(t.payment)}</td></tr>
-  `).join(""):'<tr><td colspan="4" class="empty">Belum ada transaksi.</td></tr>';
+  `).join("") : '<tr><td colspan="4" class="empty">Belum ada transaksi.</td></tr>';
 
-  const days=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();
+  const days = [];
+  for (let i=6;i>=0;i--) {
+    const d = new Date();
     d.setDate(d.getDate()-i);
-    const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const total=sum(data.transactions.filter(t=>t.date===date),"total");
-    days.push({label:d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"}),total});
+    const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const total = sum(data.transactions.filter(t=>t.date===date),"total");
+    days.push({
+      label:d.toLocaleDateString("id-ID",{day:"2-digit",month:"short"}),
+      total
+    });
   }
-  const max=Math.max(1,...days.map(x=>x.total));
-  $("salesChart").innerHTML=days.map(d=>`
+  const max = Math.max(1,...days.map(x=>x.total));
+  $("salesChart").innerHTML = days.map(d=>`
     <div class="bar-row"><span class="muted small">${safe(d.label)}</span>
     <div class="bar-track"><div class="bar-fill" style="width:${d.total/max*100}%"></div></div>
     <strong class="small">${money(d.total)}</strong></div>`).join("");
@@ -502,11 +575,12 @@ function renderDashboard() {
 
 function resetProductForm() {
   $("productForm").reset();
-  $("productId").value="";
-  $("productMin").value=5;
-  $("productUnit").value="pcs";
-  $("productFormTitle").textContent="Tambah Produk";
+  $("productId").value = "";
+  $("productMin").value = 5;
+  $("productUnit").value = "pcs";
+  $("productFormTitle").textContent = "Tambah Produk";
 }
+
 $("addProductBtn").addEventListener("click",()=>{
   resetProductForm();
   $("productFormCard").classList.remove("hidden");
@@ -516,11 +590,12 @@ $("cancelProductBtn").addEventListener("click",()=>{
   $("productFormCard").classList.add("hidden");
   resetProductForm();
 });
+
 $("productForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const pid=$("productId").value;
-  const old=pid?productById(pid):null;
-  const p={
+  const pid = $("productId").value;
+  const old = pid ? productById(pid) : null;
+  const p = {
     id:pid||id(),
     name:$("productName").value.trim(),
     category:$("productCategory").value.trim()||"Umum",
@@ -530,48 +605,63 @@ $("productForm").addEventListener("submit",e=>{
     min:Number($("productMin").value),
     unit:$("productUnit").value.trim()||"pcs"
   };
-  if(!p.name||![p.cost,p.price,p.stock,p.min].every(Number.isFinite)||p.cost<0||p.price<0||p.stock<0||p.min<0){
-    toast("Periksa kembali data produk.");return;
+  if (!p.name || ![p.cost,p.price,p.stock,p.min].every(Number.isFinite) ||
+      p.cost<0 || p.price<0 || p.stock<0 || p.min<0) {
+    toast("Periksa kembali data produk.");
+    return;
   }
-  if(p.price<p.cost&&!confirm("Harga jual lebih rendah dari modal. Tetap simpan?")) return;
-  if(old) data.products=data.products.map(x=>x.id===pid?p:x);
+  if (p.price<p.cost && !confirm("Harga jual lebih rendah dari modal. Tetap simpan?")) return;
+  if (old) data.products = data.products.map(x=>x.id===pid?p:x);
   else data.products.push(p);
-  if(!save())return;
+  if (!save()) return;
   $("productFormCard").classList.add("hidden");
   resetProductForm();
   renderAll();
   toast(old?"Produk berhasil diperbarui.":"Produk berhasil ditambahkan.");
 });
+
 function editProduct(pid) {
-  const p=productById(pid);if(!p)return;
-  $("productId").value=p.id;
-  $("productName").value=p.name;
-  $("productCategory").value=p.category;
-  $("productCost").value=p.cost;
-  $("productPrice").value=p.price;
-  $("productStock").value=p.stock;
-  $("productMin").value=p.min;
-  $("productUnit").value=p.unit;
-  $("productFormTitle").textContent="Edit Produk";
+  const p = productById(pid);
+  if (!p) return;
+  $("productId").value = p.id;
+  $("productName").value = p.name;
+  $("productCategory").value = p.category;
+  $("productCost").value = p.cost;
+  $("productPrice").value = p.price;
+  $("productStock").value = p.stock;
+  $("productMin").value = p.min;
+  $("productUnit").value = p.unit;
+  $("productFormTitle").textContent = "Edit Produk";
   $("productFormCard").classList.remove("hidden");
   $("productName").focus();
 }
+
 function deleteProduct(pid) {
-  const p=productById(pid);if(!p)return;
-  if(cart.some(x=>x.id===pid)){toast("Hapus produk dari keranjang sebelum menghapusnya.");return;}
-  if(!confirm(`Hapus produk "${p.name}"?`))return;
-  data.products=data.products.filter(x=>x.id!==pid);
-  if(save()){renderAll();toast("Produk dihapus.");}
+  const p = productById(pid);
+  if (!p) return;
+  if (cart.some(x=>x.id===pid)) {
+    toast("Hapus produk dari keranjang sebelum menghapusnya.");
+    return;
+  }
+  if (!confirm(`Hapus produk "${p.name}"?`)) return;
+  data.products = data.products.filter(x=>x.id!==pid);
+  if (save()) {
+    renderAll();
+    toast("Produk dihapus.");
+  }
 }
+
 function renderProducts() {
-  const q=$("productSearch").value.trim().toLowerCase();
-  const filter=$("stockFilter").value;
-  const products=data.products.filter(p=>{
-    const match=(p.name+" "+p.category).toLowerCase().includes(q);
-    const stockMatch=filter==="all"||(filter==="low"&&Number(p.stock)<=Number(p.min))||(filter==="out"&&Number(p.stock)<=0);
-    return match&&stockMatch;
+  const q = $("productSearch").value.trim().toLowerCase();
+  const filter = $("stockFilter").value;
+  const products = data.products.filter(p=>{
+    const match = (p.name+" "+p.category).toLowerCase().includes(q);
+    const stockMatch = filter==="all" ||
+      (filter==="low" && Number(p.stock)<=Number(p.min)) ||
+      (filter==="out" && Number(p.stock)<=0);
+    return match && stockMatch;
   });
-  $("productsTable").innerHTML=products.length?products.map(p=>`
+  $("productsTable").innerHTML = products.length ? products.map(p=>`
     <tr>
       <td><strong>${safe(p.name)}</strong><br><small class="muted">${safe(p.unit)}</small></td>
       <td>${safe(p.category)}</td><td>${money(p.cost)}</td><td>${money(p.price)}</td>
@@ -580,55 +670,62 @@ function renderProducts() {
         <button class="btn secondary small-btn" data-edit="${p.id}">Edit</button>
         <button class="btn danger small-btn" data-delete="${p.id}">Hapus</button>
       </div></td>
-    </tr>`).join(""):'<tr><td colspan="7" class="empty">Produk tidak ditemukan.</td></tr>';
+    </tr>`).join("") : '<tr><td colspan="7" class="empty">Produk tidak ditemukan.</td></tr>';
 }
 $("productSearch").addEventListener("input",renderProducts);
 $("stockFilter").addEventListener("change",renderProducts);
 $("productsTable").addEventListener("click",e=>{
-  const edit=e.target.closest("[data-edit]");
-  const del=e.target.closest("[data-delete]");
-  if(edit)editProduct(edit.dataset.edit);
-  if(del)deleteProduct(del.dataset.delete);
+  const edit = e.target.closest("[data-edit]");
+  const del = e.target.closest("[data-delete]");
+  if (edit) editProduct(edit.dataset.edit);
+  if (del) deleteProduct(del.dataset.delete);
 });
 
 function renderCashier() {
-  const q=$("cashierSearch").value.trim().toLowerCase();
-  const products=data.products.filter(p=>
-    (p.name+" "+p.category).toLowerCase().includes(q)&&Number(p.stock)>0
+  const q = $("cashierSearch").value.trim().toLowerCase();
+  const products = data.products.filter(p=>
+    (p.name+" "+p.category).toLowerCase().includes(q) && Number(p.stock)>0
   );
-  $("cashierProducts").innerHTML=products.length?products.map(p=>`
+  $("cashierProducts").innerHTML = products.length ? products.map(p=>`
     <button class="product-choice" data-addcart="${p.id}">
       <strong>${safe(p.name)}</strong><div>${money(p.price)}</div>
       <small>Stok: ${p.stock} ${safe(p.unit)}</small>
-    </button>`).join(""):'<p class="muted">Produk tidak tersedia. Tambahkan stok di menu Produk.</p>';
+    </button>`).join("") : '<p class="muted">Produk tidak tersedia. Tambahkan stok di menu Produk.</p>';
   renderCart();
 }
 $("cashierSearch").addEventListener("input",renderCashier);
 $("cashierProducts").addEventListener("click",e=>{
-  const b=e.target.closest("[data-addcart]");
-  if(!b)return;
-  const p=productById(b.dataset.addcart);
-  if(!p)return;
-  const line=cart.find(x=>x.id===p.id);
-  if((line?line.qty:0)+1>Number(p.stock)){toast("Jumlah melebihi stok yang tersedia.");return;}
-  if(line)line.qty++;
+  const b = e.target.closest("[data-addcart]");
+  if (!b) return;
+  const p = productById(b.dataset.addcart);
+  if (!p) return;
+  const line = cart.find(x=>x.id===p.id);
+  if ((line?line.qty:0)+1>Number(p.stock)) {
+    toast("Jumlah melebihi stok yang tersedia.");
+    return;
+  }
+  if (line) line.qty++;
   else cart.push({id:p.id,qty:1});
   renderCart();
 });
+
 function subtotal() {
   return cart.reduce((total,line)=>{
-    const p=productById(line.id);
+    const p = productById(line.id);
     return total+(p?Number(p.price)*line.qty:0);
   },0);
 }
 function discount() {
-  const raw=Number($("cartDiscount").value)||0;
+  const raw = Number($("cartDiscount").value)||0;
   return Math.min(Math.max(0,raw),subtotal());
 }
-function totalCart(){return Math.max(0,subtotal()-discount());}
+function totalCart() {
+  return Math.max(0,subtotal()-discount());
+}
 function renderCart() {
-  $("cartItems").innerHTML=cart.length?cart.map(line=>{
-    const p=productById(line.id);if(!p)return "";
+  $("cartItems").innerHTML = cart.length ? cart.map(line=>{
+    const p = productById(line.id);
+    if (!p) return "";
     return `<div class="cart-line">
       <div><strong>${safe(p.name)}</strong><div class="muted small">${money(p.price)} / ${safe(p.unit)}</div>
       <div class="cart-controls">
@@ -638,215 +735,442 @@ function renderCart() {
         <button data-cart-remove="${p.id}" class="muted">Hapus</button>
       </div></div><strong>${money(p.price*line.qty)}</strong>
     </div>`;
-  }).join(""):'<p class="muted">Keranjang masih kosong.</p>';
-  $("cartSubtotal").textContent=money(subtotal());
-  $("cartTotal").textContent=money(totalCart());
+  }).join("") : '<p class="muted">Keranjang masih kosong.</p>';
+  $("cartSubtotal").textContent = money(subtotal());
+  $("cartTotal").textContent = money(totalCart());
   updateChange();
 }
 $("cartItems").addEventListener("click",e=>{
-  const plus=e.target.closest("[data-cart-plus]");
-  const minus=e.target.closest("[data-cart-minus]");
-  const remove=e.target.closest("[data-cart-remove]");
-  const target=plus||minus||remove;if(!target)return;
-  const pid=target.dataset.cartPlus||target.dataset.cartMinus||target.dataset.cartRemove;
-  const line=cart.find(x=>x.id===pid);
-  const p=productById(pid);if(!line||!p)return;
-  if(plus){
-    if(line.qty+1>Number(p.stock)){toast("Stok tidak mencukupi.");return;}
-    line.qty++;
-  } else if(minus) {
-    line.qty--;
-    if(line.qty<=0)cart=cart.filter(x=>x.id!==pid);
-  } else cart=cart.filter(x=>x.id!==pid);
+  const minus = e.target.closest("[data-cart-minus]");
+  const plus = e.target.closest("[data-cart-plus]");
+  const remove = e.target.closest("[data-cart-remove]");
+  if (minus) {
+    const line = cart.find(x=>x.id===minus.dataset.cartMinus);
+    if (line) line.qty--;
+    cart = cart.filter(x=>x.qty>0);
+  }
+  if (plus) {
+    const line = cart.find(x=>x.id===plus.dataset.cartPlus);
+    const p = line && productById(line.id);
+    if (line && p && line.qty<Number(p.stock)) line.qty++;
+    else toast("Jumlah melebihi stok.");
+  }
+  if (remove) cart = cart.filter(x=>x.id!==remove.dataset.cartRemove);
   renderCart();
 });
+function updateChange() {
+  const received = Number($("cashReceived").value)||0;
+  $("cashChange").textContent = money(Math.max(0,received-totalCart()));
+}
 $("cartDiscount").addEventListener("input",renderCart);
 $("cashReceived").addEventListener("input",updateChange);
 $("paymentMethod").addEventListener("change",()=>{
-  const cash=$("paymentMethod").value==="Tunai";
-  $("cashReceivedWrap").classList.toggle("hidden",!cash);
+  $("cashReceivedWrap").classList.toggle("hidden",$("paymentMethod").value!=="Tunai");
   updateChange();
 });
-function updateChange() {
-  const cash=$("paymentMethod").value==="Tunai";
-  const received=Number($("cashReceived").value)||0;
-  $("cashChange").textContent=money(cash?Math.max(0,received-totalCart()):0);
-}
 $("clearCartBtn").addEventListener("click",()=>{
-  if(cart.length&&!confirm("Kosongkan keranjang?"))return;
-  cart=[];$("cartDiscount").value=0;$("cashReceived").value="";
-  renderCart();toast("Keranjang dikosongkan.");
+  cart = [];
+  $("cartDiscount").value = 0;
+  $("cashReceived").value = "";
+  renderCart();
 });
+
 $("checkoutBtn").addEventListener("click",()=>{
-  if(!cart.length){toast("Keranjang masih kosong.");return;}
-  for(const line of cart){
-    const p=productById(line.id);
-    if(!p||Number(p.stock)<line.qty){toast("Stok berubah atau tidak cukup. Periksa keranjang.");renderCashier();return;}
-  }
-  const payment=$("paymentMethod").value;
-  const total=totalCart();
-  const received=Number($("cashReceived").value)||0;
-  if(payment==="Tunai"&&received<total){toast("Uang diterima belum mencukupi.");return;}
-  const items=cart.map(line=>{
-    const p=productById(line.id);
-    return {id:p.id,name:p.name,qty:line.qty,price:Number(p.price),cost:Number(p.cost),unit:p.unit};
-  });
-  const subtotalValue=subtotal();
-  const discountValue=discount();
-  const costTotal=items.reduce((s,i)=>s+i.cost*i.qty,0);
-  const t={
-    id:"TRX-"+Date.now().toString(36).toUpperCase(),
-    date:today(),createdAt:new Date().toISOString(),items,
-    subtotal:subtotalValue,discount:discountValue,total,
-    costTotal,profit:total-costTotal,payment,
-    received:payment==="Tunai"?received:null,
-    change:payment==="Tunai"?received-total:null
-  };
-  items.forEach(i=>{
-    const p=productById(i.id);
-    p.stock=Number(p.stock)-i.qty;
-  });
-  data.transactions.push(t);
-  if(!save()){
-    // Batalkan perubahan stok jika transaksi gagal disimpan.
-    items.forEach(i=>{const p=productById(i.id);if(p)p.stock=Number(p.stock)+i.qty;});
-    data.transactions=data.transactions.filter(x=>x.id!==t.id);
+  if (!cart.length) {
+    toast("Keranjang masih kosong.");
     return;
   }
-  cart=[];$("cartDiscount").value=0;$("cashReceived").value="";
-  renderAll();renderCashier();toast("Transaksi berhasil disimpan.");
+  for (const line of cart) {
+    const p = productById(line.id);
+    if (!p || line.qty>Number(p.stock)) {
+      toast("Stok berubah. Periksa kembali keranjang.");
+      renderCashier();
+      return;
+    }
+  }
+  const total = totalCart();
+  const payment = $("paymentMethod").value;
+  const received = Number($("cashReceived").value)||0;
+  if (payment==="Tunai" && received<total) {
+    toast("Uang yang diterima belum cukup.");
+    return;
+  }
+  const items = cart.map(line=>{
+    const p = productById(line.id);
+    return {
+      id:p.id,name:p.name,qty:line.qty,
+      price:Number(p.price),cost:Number(p.cost),
+      subtotal:Number(p.price)*line.qty,
+      totalCost:Number(p.cost)*line.qty
+    };
+  });
+  const cost = items.reduce((a,i)=>a+i.totalCost,0);
+  const transaction = {
+    id:id(),date:today(),createdAt:new Date().toISOString(),
+    items,subtotal:subtotal(),discount:discount(),total,
+    cost,profit:total-cost,payment,
+    received:payment==="Tunai"?received:total,
+    change:payment==="Tunai"?received-total:0
+  };
+  items.forEach(item=>{
+    const p = productById(item.id);
+    if (p) p.stock = Number(p.stock)-item.qty;
+  });
+  data.transactions.push(transaction);
+  if (!save()) return;
+  cart = [];
+  $("cartDiscount").value = 0;
+  $("cashReceived").value = "";
+  renderAll();
+  toast("Transaksi berhasil disimpan.");
 });
 
-$("financeDate").value=today();
+$("financeDate").value = today();
 $("financeForm").addEventListener("submit",e=>{
   e.preventDefault();
-  const amount=Number($("financeAmount").value);
-  const date=$("financeDate").value;
-  if(!Number.isFinite(amount)||amount<=0||!date){toast("Periksa data keuangan.");return;}
-  if(date>today()){toast("Tanggal tidak boleh di masa depan.");return;}
-  const entry={
+  const entry = {
     id:id(),type:$("financeType").value,
     description:$("financeDescription").value.trim(),
-    amount,date,category:$("financeCategory").value.trim()||"Umum",
-    createdAt:new Date().toISOString()
+    amount:Number($("financeAmount").value),
+    date:$("financeDate").value,
+    category:$("financeCategory").value.trim()||"Umum"
   };
-  if(!entry.description){toast("Isi keterangan terlebih dahulu.");return;}
+  if (!entry.description || !entry.date || !Number.isFinite(entry.amount) || entry.amount<=0) {
+    toast("Periksa kembali catatan keuangan.");
+    return;
+  }
   data.finance.push(entry);
-  if(!save())return;
-  $("financeForm").reset();
-  $("financeDate").value=today();
-  $("financeCategory").value="Umum";
-  renderAll();toast("Catatan keuangan berhasil disimpan.");
-});
-function renderFinance() {
-  const tx=todayTransactions();
-  const income=todayFinance("income");
-  const expense=todayFinance("expense");
-  const profit=sum(tx,"profit");
-  $("financeSales").textContent=money(sum(tx,"total"));
-  $("financeIncome").textContent=money(sum(income,"amount"));
-  $("financeExpense").textContent=money(sum(expense,"amount"));
-  $("financeNet").textContent=money(profit+sum(income,"amount")-sum(expense,"amount"));
-  const entries=[...data.finance].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
-  $("financeTable").innerHTML=entries.length?entries.map(f=>`
-    <tr><td>${safe(f.date)}</td>
-    <td><span class="pill ${f.type==="income"?"green":"red"}">${f.type==="income"?"Pemasukan":"Pengeluaran"}</span></td>
-    <td>${safe(f.description)}</td><td>${safe(f.category)}</td><td>${money(f.amount)}</td>
-    <td><button class="btn danger small-btn" data-finance-delete="${f.id}">Hapus</button></td></tr>
-  `).join(""):'<tr><td colspan="6" class="empty">Belum ada catatan keuangan.</td></tr>';
-}
-$("financeTable").addEventListener("click",e=>{
-  const b=e.target.closest("[data-finance-delete]");if(!b)return;
-  const f=data.finance.find(x=>x.id===b.dataset.financeDelete);if(!f)return;
-  if(!confirm("Hapus catatan ini?"))return;
-  data.finance=data.finance.filter(x=>x.id!==f.id);
-  if(save()){renderAll();toast("Catatan dihapus.");}
+  if (save()) {
+    $("financeForm").reset();
+    $("financeDate").value = today();
+    $("financeCategory").value = "Umum";
+    renderAll();
+    toast("Catatan keuangan berhasil disimpan.");
+  }
 });
 
-function reportTransactions() {
-  const start=$("reportStart").value;
-  const end=$("reportEnd").value;
-  if(start&&end&&start>end){toast("Tanggal awal harus sebelum tanggal akhir.");return null;}
-  return data.transactions.filter(t=>(!start||t.date>=start)&&(!end||t.date<=end))
-    .sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+function renderFinance() {
+  const tx = todayTransactions();
+  const sales = sum(tx,"total");
+  const profit = sum(tx,"profit");
+  const income = sum(todayFinance("income"),"amount");
+  const expense = sum(todayFinance("expense"),"amount");
+  $("financeSales").textContent = money(sales);
+  $("financeIncome").textContent = money(income);
+  $("financeExpense").textContent = money(expense);
+  $("financeNet").textContent = money(profit+income-expense);
+
+  const entries = [...data.finance].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  $("financeTable").innerHTML = entries.length ? entries.map(f=>`
+    <tr><td>${safe(f.date)}</td>
+    <td><span class="pill ${f.type==="income"?"green":"red"}">${f.type==="income"?"Pemasukan":"Pengeluaran"}</span></td>
+    <td>${safe(f.description)}</td><td>${safe(f.category)}</td>
+    <td>${money(f.amount)}</td><td><button class="btn danger small-btn" data-finance-delete="${f.id}">Hapus</button></td></tr>
+  `).join("") : '<tr><td colspan="6" class="empty">Belum ada catatan keuangan.</td></tr>';
 }
+$("financeTable").addEventListener("click",e=>{
+  const b = e.target.closest("[data-finance-delete]");
+  if (!b) return;
+  if (!confirm("Hapus catatan keuangan ini?")) return;
+  data.finance = data.finance.filter(f=>f.id!==b.dataset.financeDelete);
+  if (save()) {
+    renderAll();
+    toast("Catatan dihapus.");
+  }
+});
+
 function renderReport() {
-  const tx=reportTransactions();if(!tx)return;
-  const start=$("reportStart").value;
-  const end=$("reportEnd").value;
-  const finances=data.finance.filter(f=>(!start||f.date>=start)&&(!end||f.date<=end));
-  const sales=sum(tx,"total"),cost=sum(tx,"costTotal");
-  $("reportSales").textContent=money(sales);
-  $("reportCost").textContent=money(cost);
-  $("reportProfit").textContent=money(sales-cost);
-  $("reportExpense").textContent=money(sum(finances.filter(f=>f.type==="expense"),"amount"));
-  $("reportTable").innerHTML=tx.length?tx.map(t=>`
+  const start = $("reportStart").value;
+  const end = $("reportEnd").value;
+  const tx = data.transactions.filter(t=>
+    (!start||t.date>=start)&&(!end||t.date<=end)
+  );
+  const finance = data.finance.filter(f=>
+    (!start||f.date>=start)&&(!end||f.date<=end)
+  );
+  const sales = sum(tx,"total");
+  const cost = sum(tx,"cost");
+  const profit = sum(tx,"profit");
+  const expense = sum(finance.filter(f=>f.type==="expense"),"amount");
+  $("reportSales").textContent = money(sales);
+  $("reportCost").textContent = money(cost);
+  $("reportProfit").textContent = money(profit);
+  $("reportExpense").textContent = money(expense);
+  $("reportTable").innerHTML = tx.length ? tx.map(t=>`
     <tr><td>${safe(t.date)}</td><td>${safe(t.id)}</td>
-    <td>${safe(t.items.map(i=>i.name+" ×"+i.qty).join(", "))}</td>
-    <td>${money(t.total)}</td><td>${money(t.costTotal)}</td>
+    <td>${safe((t.items||[]).map(i=>i.name+" ×"+i.qty).join(", "))}</td>
+    <td>${money(t.total)}</td><td>${money(t.cost)}</td>
     <td>${money(t.profit)}</td><td>${safe(t.payment)}</td></tr>
-  `).join(""):'<tr><td colspan="7" class="empty">Tidak ada transaksi pada periode ini.</td></tr>';
+  `).join("") : '<tr><td colspan="7" class="empty">Tidak ada transaksi pada periode ini.</td></tr>';
 }
 $("generateReportBtn").addEventListener("click",renderReport);
-$("reportStart").addEventListener("change",renderReport);
-$("reportEnd").addEventListener("change",renderReport);
-$("printBtn").addEventListener("click",()=>{renderReport();window.print();});
+$("printBtn").addEventListener("click",()=>window.print());
 $("exportCsvBtn").addEventListener("click",()=>{
-  const tx=reportTransactions();if(!tx)return;
-  const rows=[
-    ["Tanggal","ID Transaksi","Produk","Subtotal","Diskon","Total","Modal","Laba Kotor","Pembayaran"],
-    ...tx.map(t=>[t.date,t.id,t.items.map(i=>`${i.name} x${i.qty}`).join(", "),t.subtotal,t.discount,t.total,t.costTotal,t.profit,t.payment])
-  ];
-  const csv="\uFEFF"+rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
-  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=`laporan-usahaku-${today()}.csv`;
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  toast("Laporan berhasil diekspor.");
+  const start = $("reportStart").value;
+  const end = $("reportEnd").value;
+  const tx = data.transactions.filter(t=>
+    (!start||t.date>=start)&&(!end||t.date<=end)
+  );
+  const rows = [["Tanggal","ID Transaksi","Produk","Total","Modal","Laba Kotor","Pembayaran"]];
+  tx.forEach(t=>rows.push([
+    t.date,t.id,(t.items||[]).map(i=>`${i.name} x${i.qty}`).join("; "),
+    t.total,t.cost,t.profit,t.payment
+  ]));
+  const csv = "\uFEFF"+rows.map(row=>row.map(v=>
+    `"${String(v??"").replace(/"/g,'""')}"`
+  ).join(",")).join("\r\n");
+  const blob = new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `laporan-usahaku-${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 $("backupBtn").addEventListener("click",()=>{
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=`cadangan-usahaku-${today()}.json`;
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-  toast("Cadangan data berhasil dibuat.");
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `cadangan-usahaku-${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 });
 $("restoreBtn").addEventListener("click",async()=>{
-  const file=$("restoreFile").files[0];
-  if(!file){toast("Pilih file cadangan terlebih dahulu.");return;}
+  const file = $("restoreFile").files[0];
+  if (!file) {
+    toast("Pilih file cadangan JSON terlebih dahulu.");
+    return;
+  }
   try {
-    const restored=JSON.parse(await file.text());
-    if(!restored||!Array.isArray(restored.products)||!Array.isArray(restored.transactions)||!Array.isArray(restored.finance)) {
-      throw new Error("Format cadangan tidak sesuai.");
+    const restored = JSON.parse(await file.text());
+    if (!restored || !Array.isArray(restored.products) ||
+        !Array.isArray(restored.transactions) || !Array.isArray(restored.finance)) {
+      throw Error("Format cadangan tidak sesuai.");
     }
-    if(!confirm("Data saat ini akan diganti oleh data cadangan. Lanjutkan?"))return;
-    data=restored;cart=[];
-    if(save()){renderAll();renderCashier();toast("Cadangan berhasil dipulihkan.");}
+    if (!confirm("Pulihkan data dari file ini? Data yang sekarang akan diganti.")) return;
+    data = restored;
+    if (save()) {
+      renderAll();
+      toast("Cadangan berhasil dipulihkan.");
+    }
   } catch(err) {
-    toast("File cadangan tidak valid atau tidak dapat dibaca.");
+    toast("File cadangan tidak valid: "+err.message);
   }
 });
 $("resetBtn").addEventListener("click",()=>{
-  if(!confirm("Semua produk, transaksi, dan keuangan akan dihapus. Pastikan sudah membuat cadangan. Lanjutkan?"))return;
-  if(!confirm("Konfirmasi sekali lagi: hapus seluruh data UsahaKu?"))return;
-  data={products:[],transactions:[],finance:[]};cart=[];
-  if(save()){renderAll();renderCashier();toast("Data berhasil dihapus.");}
+  if (!confirm("Hapus semua produk, transaksi, dan catatan keuangan? Tindakan ini tidak dapat dibatalkan.")) return;
+  if (!confirm("Pastikan kamu sudah mengunduh cadangan. Lanjutkan menghapus semua data?")) return;
+  data = {products:[],transactions:[],finance:[]};
+  if (save()) {
+    renderAll();
+    toast("Semua data aplikasi telah dihapus.");
+  }
 });
 
 function renderAll() {
   renderDashboard();
   renderProducts();
+  renderCashier();
   renderFinance();
   renderReport();
-  renderCashier();
+  $("todayLabel").textContent = new Date().toLocaleDateString("id-ID",{
+    weekday:"short",day:"numeric",month:"short",year:"numeric"
+  });
 }
-$("todayLabel").textContent=new Date().toLocaleDateString("id-ID",{
-  weekday:"long",day:"numeric",month:"long",year:"numeric"
+
+// Konfigurasi Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAkhqCcKDJdqfIsat9hvNWOvbXLt2h1u6E",
+  authDomain: "usahakuns.firebaseapp.com",
+  projectId: "usahakuns",
+  storageBucket: "usahakuns.firebasestorage.app",
+  messagingSenderId: "714179382738",
+  appId: "1:714179382738:web:7b05dc385f8c0b98a64c0b",
+  measurementId: "G-VNT9J8M9Y5"
+};
+
+const loginForm = $("loginForm");
+const authScreen = $("authScreen");
+const appLayout = $("appLayout");
+const authError = $("authError");
+
+function showLogin(message = "") {
+  authScreen.style.display = "flex";
+  appLayout.style.display = "none";
+  authError.textContent = message;
+  $("cloudStatus").textContent = "Belum tersambung";
+}
+
+function showApp() {
+  authScreen.style.display = "none";
+  appLayout.style.display = "";
+  $("cloudStatus").textContent = "Menghubungkan cloud…";
+}
+
+async function connectCloud(user) {
+  cloudReady = false;
+
+  if (cloudUnsubscribe) {
+    cloudUnsubscribe();
+    cloudUnsubscribe = null;
+  }
+
+  cloudDoc = firebase.firestore()
+    .collection("usahaKu")
+    .doc("data");
+
+  try {
+    const doc = await cloudDoc.get();
+
+    if (doc.exists && doc.data() && doc.data().data) {
+      const remote = doc.data().data;
+
+      if (
+        !Array.isArray(remote.products) ||
+        !Array.isArray(remote.transactions) ||
+        !Array.isArray(remote.finance)
+      ) {
+        throw new Error("Format data cloud tidak sesuai.");
+      }
+
+      applyingCloudData = true;
+      data = remote;
+      localStorage.setItem(KEY, JSON.stringify(data));
+      applyingCloudData = false;
+      renderAll();
+    } else {
+      const hasLocal = localStorage.getItem(KEY);
+      const localData = loadData();
+
+      const migrate = confirm(
+        hasLocal
+          ? "Database online masih kosong. Pindahkan data dari perangkat ini ke cloud?"
+          : "Database online masih kosong. Buat data awal UsahaKu di cloud?"
+      );
+
+      if (migrate) {
+        data = localData;
+        await cloudDoc.set({
+          data: JSON.parse(JSON.stringify(data)),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+
+    cloudReady = true;
+    $("cloudStatus").textContent = "Tersinkron ke cloud";
+
+    cloudUnsubscribe = cloudDoc.onSnapshot(snapshot => {
+      if (!snapshot.exists || !snapshot.data()?.data) return;
+
+      const remote = snapshot.data().data;
+      if (
+        !Array.isArray(remote.products) ||
+        !Array.isArray(remote.transactions) ||
+        !Array.isArray(remote.finance)
+      ) return;
+
+      applyingCloudData = true;
+      data = remote;
+
+      try {
+        localStorage.setItem(KEY, JSON.stringify(data));
+      } catch (err) {
+        console.warn("Penyimpanan lokal gagal:", err);
+      }
+
+      applyingCloudData = false;
+      renderAll();
+      $("cloudStatus").textContent = "Tersinkron ke cloud";
+    }, err => {
+      console.error("Cloud listener error:", err);
+      $("cloudStatus").textContent = "Cloud terputus—periksa izin";
+    });
+
+  } catch (err) {
+    applyingCloudData = false;
+    cloudReady = false;
+    console.error("Firebase error:", err);
+    $("cloudStatus").textContent = "Gagal terhubung";
+    toast("Gagal terhubung ke cloud. Periksa koneksi dan Rules Firestore.");
+  }
+}
+
+// Inisialisasi Firebase
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
+      showApp();
+      await connectCloud(user);
+    } else {
+      cloudReady = false;
+
+      if (cloudUnsubscribe) {
+        cloudUnsubscribe();
+        cloudUnsubscribe = null;
+      }
+
+      showLogin();
+    }
+  });
+} catch (err) {
+  console.error("Inisialisasi Firebase gagal:", err);
+  showLogin("Konfigurasi Firebase bermasalah. Periksa konfigurasi aplikasi.");
+}
+
+// Proses login
+loginForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const button = $("loginButton");
+  button.disabled = true;
+  button.textContent = "Memproses…";
+  authError.textContent = "";
+
+  try {
+    await firebase.auth().signInWithEmailAndPassword(
+      $("loginEmail").value.trim(),
+      $("loginPassword").value
+    );
+  } catch (err) {
+    console.error("Login gagal:", err);
+
+    authError.textContent =
+      err.code === "auth/invalid-credential" ||
+      err.code === "auth/wrong-password" ||
+      err.code === "auth/user-not-found"
+        ? "Email atau kata sandi salah. Periksa akun Firebase Authentication."
+        : err.message || "Login gagal. Periksa koneksi dan konfigurasi Firebase.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Masuk";
+  }
 });
-renderAll();
+
+// Proses logout
+$("logoutButton").addEventListener("click", async () => {
+  if (!confirm("Keluar dari akun UsahaKu di perangkat ini?")) return;
+
+  cloudReady = false;
+
+  if (cloudUnsubscribe) {
+    cloudUnsubscribe();
+    cloudUnsubscribe = null;
+  }
+
+  try {
+    await firebase.auth().signOut();
+  } catch (err) {
+    console.error("Logout gagal:", err);
+    toast("Gagal keluar. Coba lagi.");
+  }
+});
 </script>
 </body>
 </html>
